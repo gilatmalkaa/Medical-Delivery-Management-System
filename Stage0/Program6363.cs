@@ -7,7 +7,7 @@ namespace Stage0
         static void Main(string[] args)
         {
             Welcome6363();
-            Welcome9172
+            Welcome9172();
             Console.ReadKey();
         }
         static partial void Welcome9172();
