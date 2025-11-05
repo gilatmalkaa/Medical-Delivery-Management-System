@@ -8,4 +8,6 @@ public interface IOrder
     IEnumerable<Order?> ReadAll();
     void Update(Order item);
     void Delete(int id);
+    void DeleteAll();
+
 }

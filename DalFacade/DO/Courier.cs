@@ -18,11 +18,11 @@ public record Courier(
     string Phone,
     string Email,
     string Signature,
-    bool IsActive = true,
-    double MaxPersonalDeliveryDistance?,
+    double MaxPersonalDeliveryDistance,
     DeliveryType Type = DeliveryType.Foot,
+    bool IsActive = true,
     DateTime? StartWorkDate = default
 )
 {
-    public Courier() : this(0, "", "", "", null, true, 0, DeliveryType.Foot, default) { }
+    public Courier() : this(0, "", "", "", "", 0, DeliveryType.Foot, true, default) { }
 }

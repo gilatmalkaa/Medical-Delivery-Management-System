@@ -25,5 +25,5 @@ public record Delivery(
     DateTime? EndDeliveryDate
 )
 {
-    public Delivery() : this(0, 0, 0, DeliveryType.Foot, default, null, null, DeliveryStatus.InProgress, null) { }
+    public Delivery() : this(0, 0, 0, DeliveryType.Foot, default, 0, null, DeliveryStatus.InProgress, null) { }
 }

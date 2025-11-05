@@ -8,4 +8,6 @@ public interface IDelivery
     IEnumerable<Delivery?> ReadAll();
     void Update(Delivery item);
     void Delete(int id);
+    void DeleteAll();
+
 }

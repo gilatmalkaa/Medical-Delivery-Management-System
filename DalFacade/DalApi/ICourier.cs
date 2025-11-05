@@ -8,4 +8,6 @@ public interface ICourier
     IEnumerable<Courier?> ReadAll();
     void Update(Courier item);
     void Delete(int id);
+    void DeleteAll();
+
 }
