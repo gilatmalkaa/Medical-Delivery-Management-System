@@ -1,10 +1,11 @@
 ﻿namespace DO;
 
 /// <summary>
-/// Order entity represents a delivery order, including all identifying and descriptive details.
+/// Order entity represents a delivery order placed by a customer.
+/// Contains all relevant data such as customer details, location, weight, and creation time.
 /// </summary>
 /// <param name="Id">Unique ID of the order (as defined by the running order number in Config).</param>
-/// <param name="Type">Type of order (according to company’s classification).</param>
+/// <param name="Type">Type of order (Regular, Express, SameDay).</param>
 /// <param name="Description">Short description of the order contents.</param>
 /// <param name="Address">Full delivery address in standard format.</param>
 /// <param name="Latitude">Latitude coordinate (X) of the order address.</param>
@@ -26,5 +27,9 @@ public record Order(
     DateTime? OpenDate = null
 )
 {
+    /// <summary>
+    /// Default constructor initializing an empty order
+    /// with default values for all fields.
+    /// </summary>
     public Order() : this(0, default, "", "", 0, 0, "", "", 0, default) { }
 }
