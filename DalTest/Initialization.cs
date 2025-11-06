@@ -12,22 +12,22 @@ public static class Initialization
     /// <summary>
     /// DAL interface for handling Orders.
     /// </summary>
-    private static IOrder? s_dalOrder;
+    private static IOrder? s_dalOrder;     
 
     /// <summary>
     /// DAL interface for handling Couriers.
     /// </summary>
-    private static ICourier? s_dalCourier;
+    private static ICourier? s_dalCourier; 
 
     /// <summary>
     /// DAL interface for handling Deliveries.
     /// </summary>
-    private static IDelivery? s_dalDelivery;
+    private static IDelivery? s_dalDelivery; 
 
     /// <summary>
     /// DAL interface for handling Config (configuration values).
     /// </summary>
-    private static IConfig? s_dalConfig;
+    private static IConfig? s_dalConfig; 
 
     /// <summary>
     /// Random generator used to create randomized demo data for initialization.
@@ -66,6 +66,7 @@ public static class Initialization
         }
     }
 
+
     /// <summary>
     /// Creates a collection of demo orders and adds them to the DAL.
     /// Used to populate the system with example Order entities.
@@ -97,6 +98,7 @@ public static class Initialization
             }
         }
     }
+
 
     /// <summary>
     /// Creates demo deliveries connecting couriers to existing orders.
@@ -134,6 +136,7 @@ public static class Initialization
         }
     }
 
+ 
     /// <summary>
     /// Fully initializes all DAL entities.
     /// Steps performed:
@@ -141,10 +144,6 @@ public static class Initialization
     /// 2. Clears all existing data in Orders, Couriers, and Deliveries.
     /// 3. Creates demo data for each entity type.
     /// </summary>
-    /// <param name="dalOrder">Order DAL instance used for CRUD operations.</param>
-    /// <param name="dalCourier">Courier DAL instance used for CRUD operations.</param>
-    /// <param name="dalDelivery">Delivery DAL instance used for CRUD operations.</param>
-    /// <param name="dalConfig">Config DAL instance used for system configuration.</param>
     public static void Do(IOrder dalOrder, ICourier dalCourier, IDelivery dalDelivery, IConfig dalConfig)
     {
         // === Validate input ===

@@ -34,10 +34,4 @@ public interface IOrder
     /// Deletes the order with the specified ID from the data source.
     /// </summary>
     void Delete(int id);
-
-    /// <summary>
-    /// Deletes all orders from the data source.
-    /// Typically used during system reset or testing.
-    /// </summary>
-    void DeleteAll();
 }

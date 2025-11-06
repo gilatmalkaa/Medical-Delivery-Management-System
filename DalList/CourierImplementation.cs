@@ -69,51 +69,14 @@ public class CourierImplementation : ICourier
         if (existing == null)
             throw new Exception($"Courier with ID={item.Id} does not exist");
 
-        DataSource.Couriers.Remove(existing);
-        DataSource.Couriers.Add(item);
-    }
 
-    /// <summary>
-    /// Deletes a courier by ID.
-    /// </summary>
-    /// <param name="id">ID of the courier to delete.</param>
-    /// <exception cref="Exception">Thrown if the courier does not exist.</exception>
-    public void Delete(int id)
-    {
-        Courier? courier = Read(id);
-        if (courier == null)
-            throw new Exception($"Courier with ID={id} does not exist");
 
-        DataSource.Couriers.Remove(courier);
-    }
+public class CourierImplementation : ICourier
+{
+    public int Create(Courier item) => throw new NotImplementedException();
+    public Courier? Read(int id) => throw new NotImplementedException();
+    public IEnumerable<Courier?> ReadAll() => throw new NotImplementedException();
+    public void Update(Courier item) => throw new NotImplementedException();
+    public void Delete(int id) => throw new NotImplementedException();
 
-    /// <summary>
-    /// Deletes all couriers from the data source.
-    /// </summary>
-    public void DeleteAll()
-    {
-        DataSource.Couriers.Clear();
-    }
-
-    /// <summary>
-    /// Explicit implementation of the Create method from ICourier interface.
-    /// Not implemented at this stage (for later project phases).
-    /// </summary>
-    /// <param name="item">Courier entity.</param>
-    /// <returns>Courier ID after creation (not implemented).</returns>
-    /// <exception cref="NotImplementedException">Always thrown for now.</exception>
-    int ICourier.Create(Courier item)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Explicit implementation of the ReadAll method from ICourier interface.
-    /// Returns an enumerable collection of couriers.
-    /// </summary>
-    /// <returns>Enumerable of couriers.</returns>
-    IEnumerable<Courier?> ICourier.ReadAll()
-    {
-        return ReadAll();
-    }
 }

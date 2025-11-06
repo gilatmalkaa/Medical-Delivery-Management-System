@@ -1,10 +1,5 @@
 ﻿namespace DalApi;
 
-/// <summary>
-/// Interface for managing global configuration parameters in the DAL layer.
-/// Provides access to system-wide properties such as time and range limits,
-/// and allows resetting all configuration values.
-/// </summary>
 public interface IConfig
 {
     /// <summary>
