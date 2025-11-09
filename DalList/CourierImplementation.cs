@@ -5,7 +5,7 @@ using DO;
 /// <summary>
 /// Implements ICourier — manages Courier data in memory.
 /// </summary>
-public class CourierImplementation : ICourier
+internal class CourierImplementation : ICourier
 {
     /// <summary>
     /// Adds a new courier. Generates a new ID if Id == 0.
@@ -75,21 +75,6 @@ public class CourierImplementation : ICourier
     {
         DataSource.Couriers.Clear();
     }
-
-    /// <summary>
-    /// Explicit interface Create method — wraps the public Create().
-    /// </summary>
-    int ICourier.Create(Courier item)
-    {
-        Create(item);
-        return item.Id;
-    }
-
-    /// <summary>
-    /// Explicit interface ReadAll method — returns all couriers.
-    /// </summary>
-    IEnumerable<Courier?> ICourier.ReadAll()
-    {
-        return ReadAll();
-    }
 }
+
+  

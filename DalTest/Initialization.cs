@@ -9,42 +9,31 @@ using DO;
 /// </summary>
 public static class Initialization
 {
-    /// <summary>
-    /// DAL interface for handling Orders.
-    /// </summary>
-    private static IOrder? s_dalOrder;     
+    private static IDal? s_dal;
 
-    /// <summary>
-    /// DAL interface for handling Couriers.
-    /// </summary>
-    private static ICourier? s_dalCourier; 
-
-    /// <summary>
-    /// DAL interface for handling Deliveries.
-    /// </summary>
-    private static IDelivery? s_dalDelivery; 
-
-    /// <summary>
-    /// DAL interface for handling Config (configuration values).
-    /// </summary>
-    private static IConfig? s_dalConfig; 
 
     /// <summary>
     /// Random generator used to create randomized demo data for initialization.
     /// </summary>
     private static readonly Random s_rand = new();
 
+    public static void Do(IDal dal)
+    {
+        s_dal = dal ?? throw new NullReferenceException("DAL object can not be null!");
+        Console.WriteLine("Reset data...");
+        s_dal.ResetDB();
+        createCouriers();
+        createOrders();
+        createDeliveries();
+    }
 
-    /// <summary>
-    /// Creates a collection of demo couriers and adds them to the DAL.
-    /// Used to populate the system with example Courier entities.
-    /// </summary>
+
     private static void createCouriers()
     {
         for (int i = 0; i < 5; i++)
         {
             Courier courier = new(
-                Id: 0, // ID generated automatically via NextCourierId
+                Id: 0, 
                 FullName: $"Courier {i + 1}",
                 Phone: $"050-12{i}3456",
                 Email: $"courier{i + 1}@mail.com",
@@ -57,7 +46,7 @@ public static class Initialization
 
             try
             {
-                s_dalCourier!.Create(courier);
+                s_dal.Courier.Create(courier);
             }
             catch (Exception ex)
             {
@@ -66,17 +55,12 @@ public static class Initialization
         }
     }
 
-
-    /// <summary>
-    /// Creates a collection of demo orders and adds them to the DAL.
-    /// Used to populate the system with example Order entities.
-    /// </summary>
     private static void createOrders()
     {
         for (int i = 0; i < 8; i++)
         {
             Order order = new(
-                Id: 0, // Automatically assigned by Create()
+                Id: 0,
                 Type: (OrderType)(i % Enum.GetValues(typeof(OrderType)).Length),
                 Description: $"Order number {i + 1}",
                 Address: $"Ben Yehuda {20 + i}, Tel Aviv",
@@ -90,7 +74,7 @@ public static class Initialization
 
             try
             {
-                s_dalOrder!.Create(order);
+                s_dal.Order.Create(order);
             }
             catch (Exception ex)
             {
@@ -99,15 +83,10 @@ public static class Initialization
         }
     }
 
-
-    /// <summary>
-    /// Creates demo deliveries connecting couriers to existing orders.
-    /// Used to create relational data between Orders and Couriers.
-    /// </summary>
     private static void createDeliveries()
     {
-        List<Order> orders = s_dalOrder!.ReadAll().Where(o => o != null).Cast<Order>().ToList();
-        List<Courier> couriers = s_dalCourier!.ReadAll().Where(c => c != null).Cast<Courier>().ToList();
+        List<Order> orders = s_dal.Order.ReadAll();
+        List<Courier> couriers = s_dal.Courier.ReadAll();
 
         int deliveriesCount = Math.Min(orders.Count, couriers.Count);
 
@@ -127,46 +106,12 @@ public static class Initialization
 
             try
             {
-                s_dalDelivery!.Create(delivery);
+                s_dal.Delivery.Create(delivery);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating delivery {i + 1}: {ex.Message}");
             }
         }
-    }
-
- 
-    /// <summary>
-    /// Fully initializes all DAL entities.
-    /// Steps performed:
-    /// 1. Resets configuration values.
-    /// 2. Clears all existing data in Orders, Couriers, and Deliveries.
-    /// 3. Creates demo data for each entity type.
-    /// </summary>
-    public static void Do(IOrder dalOrder, ICourier dalCourier, IDelivery dalDelivery, IConfig dalConfig)
-    {
-        // === Validate input ===
-        s_dalOrder = dalOrder ?? throw new NullReferenceException("DAL object cannot be null!");
-        s_dalCourier = dalCourier ?? throw new NullReferenceException("DAL object cannot be null!");
-        s_dalDelivery = dalDelivery ?? throw new NullReferenceException("DAL object cannot be null!");
-        s_dalConfig = dalConfig ?? throw new NullReferenceException("DAL object cannot be null!");
-
-        // === Reset & Clear ===
-        Console.WriteLine("Reset configuration and clear data...");
-        s_dalConfig.Reset();
-        s_dalOrder.DeleteAll();
-        s_dalCourier.DeleteAll();
-        s_dalDelivery.DeleteAll();
-
-        // === Initialize Entities ===
-        Console.WriteLine("Creating Couriers...");
-        createCouriers();
-        Console.WriteLine("Creating Orders...");
-        createOrders();
-        Console.WriteLine("Creating Deliveries...");
-        createDeliveries();
-
-        Console.WriteLine("✅ Initialization completed successfully!");
     }
 }
