@@ -2,44 +2,21 @@
 using Dal;
 using DO;
 
+
 namespace DalTest;
 
 /// <summary>
-/// Main testing console application for DAL layer.
-/// Provides interactive text-based menus for manual CRUD testing
-/// of all DAL entities (Orders, Couriers, Deliveries, and Config).
+/// Console-based test program for the DAL layer.
+/// Allows CRUD operations testing for Orders, Couriers, Deliveries, and Config.
 /// </summary>
 internal class Program
 {
-    /// <summary>
-    /// Data access object for Orders.
-    /// </summary>
-    private static IOrder s_dalOrder = new OrderImplementation();
-
-    /// <summary>
-    /// Data access object for Couriers.
-    /// </summary>
-    private static ICourier s_dalCourier = new CourierImplementation();
-
-    /// <summary>
-    /// Data access object for Deliveries.
-    /// </summary>
-    private static IDelivery s_dalDelivery = new DeliveryImplementation();
-
-    /// <summary>
-    /// Data access object for system configuration.
-    /// </summary>
-    private static IConfig s_dalConfig = new ConfigImplementation();
-
-    /// <summary>
-    /// Entry point of the DalTest console program.
-    /// Initializes demo data and opens the interactive CLI test menu.
-    /// </summary>
+    static readonly IDal s_dal = new DalList();
     static void Main()
     {
         try
         {
-            Initialization.Do(s_dalOrder, s_dalCourier, s_dalDelivery, s_dalConfig);
+            Initialization.Do(s_dal);
             Console.WriteLine("Initialization completed successfully!");
         }
         catch (Exception ex)
@@ -79,10 +56,7 @@ internal class Program
         }
     }
 
-    /// <summary>
-    /// Displays the Orders menu and allows the user to perform CRUD operations
-    /// on Order entities using the IOrder DAL interface.
-    /// </summary>
+    // === Orders Menu ===
     private static void OrderMenu()
     {
         while (true)
@@ -99,9 +73,6 @@ internal class Program
             switch (choice)
             {
                 case 1:
-                    /// <summary>
-                    /// Example of creating a new Order entity.
-                    /// </summary>
                     var order = new Order(
                         Id: 0,
                         Type: OrderType.Regular,
@@ -112,26 +83,27 @@ internal class Program
                         CustomerName: "Test Customer",
                         CustomerPhone: "0521234567",
                         Weight: 2.5,
-                        OpenDate: DateTime.Now);
-                    s_dalOrder.Create(order);
+                        OpenDate: DateTime.Now
+                    );
+                    s_dal!.Order.Create(order);
                     Console.WriteLine("Order added successfully!");
                     break;
 
                 case 2:
                     Console.Write("Enter ID: ");
                     int id = int.Parse(Console.ReadLine()!);
-                    Console.WriteLine(s_dalOrder.Read(id));
+                    Console.WriteLine(s_dal!.Order.Read(id));
                     break;
 
                 case 3:
-                    foreach (var o in s_dalOrder.ReadAll())
+                    foreach (var o in s_dal!.Order.ReadAll())
                         Console.WriteLine(o);
                     break;
 
                 case 4:
                     Console.Write("Enter ID to delete: ");
                     int delId = int.Parse(Console.ReadLine()!);
-                    s_dalOrder.Delete(delId);
+                    s_dal!.Order.Delete(delId);
                     Console.WriteLine("Order deleted.");
                     break;
 
@@ -141,48 +113,7 @@ internal class Program
         }
     }
 
-    /// <summary>
-    /// Displays and manages Config menu options.
-    /// Allows user to reset and display configuration data.
-    /// </summary>
-    private static void ConfigMenu()
-    {
-        while (true)
-        {
-            Console.WriteLine("\n--- Config Menu ---");
-            Console.WriteLine("1. Reset Config");
-            Console.WriteLine("2. Show Config");
-            Console.WriteLine("0. Back");
-            Console.Write("Choose: ");
-
-            if (!int.TryParse(Console.ReadLine(), out int choice))
-                continue;
-
-            switch (choice)
-            {
-                case 1:
-                    s_dalConfig.Reset();
-                    Console.WriteLine("Config Reset");
-                    break;
-
-                case 2:
-                    Console.WriteLine(s_dalConfig.ToString());
-                    break;
-
-                case 0:
-                    return;
-
-                default:
-                    Console.WriteLine("Invalid choice.");
-                    break;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Displays and manages Courier menu options.
-    /// Allows user to perform CRUD operations on Couriers.
-    /// </summary>
+    // === Couriers Menu ===
     private static void CourierMenu()
     {
         while (true)
@@ -194,16 +125,11 @@ internal class Program
             Console.WriteLine("4. Delete Courier");
             Console.WriteLine("0. Back");
             Console.Write("Choose: ");
-
-            if (!int.TryParse(Console.ReadLine(), out int choice))
-                continue;
+            if (!int.TryParse(Console.ReadLine(), out int choice)) continue;
 
             switch (choice)
             {
                 case 1:
-                    /// <summary>
-                    /// Example of creating a new Courier entity.
-                    /// </summary>
                     var courier = new Courier(
                         Id: 0,
                         FullName: "Test Courier",
@@ -215,42 +141,35 @@ internal class Program
                         Type: DeliveryType.Foot,
                         StartWorkDate: DateTime.Now
                     );
-                    s_dalCourier.Create(courier);
+                    s_dal!.Courier.Create(courier);
                     Console.WriteLine("Courier added successfully!");
                     break;
 
                 case 2:
                     Console.Write("Enter ID: ");
                     int id = int.Parse(Console.ReadLine()!);
-                    Console.WriteLine(s_dalCourier.Read(id));
+                    Console.WriteLine(s_dal!.Courier.Read(id));
                     break;
 
                 case 3:
-                    foreach (var c in s_dalCourier.ReadAll())
+                    foreach (var c in s_dal!.Courier.ReadAll())
                         Console.WriteLine(c);
                     break;
 
                 case 4:
                     Console.Write("Enter ID to delete: ");
                     int delId = int.Parse(Console.ReadLine()!);
-                    s_dalCourier.Delete(delId);
+                    s_dal!.Courier.Delete(delId);
                     Console.WriteLine("Courier deleted.");
                     break;
 
                 case 0:
                     return;
-
-                default:
-                    Console.WriteLine("Invalid choice.");
-                    break;
             }
         }
     }
 
-    /// <summary>
-    /// Displays and manages Delivery menu options.
-    /// Allows user to perform CRUD operations on Deliveries.
-    /// </summary>
+    // === Deliveries Menu ===
     private static void DeliveryMenu()
     {
         while (true)
@@ -262,16 +181,11 @@ internal class Program
             Console.WriteLine("4. Delete Delivery");
             Console.WriteLine("0. Back");
             Console.Write("Choose: ");
-
-            if (!int.TryParse(Console.ReadLine(), out int choice))
-                continue;
+            if (!int.TryParse(Console.ReadLine(), out int choice)) continue;
 
             switch (choice)
             {
                 case 1:
-                    /// <summary>
-                    /// Example of creating a new Delivery entity that links an Order and a Courier.
-                    /// </summary>
                     Console.Write("Enter Order ID: ");
                     int orderId = int.Parse(Console.ReadLine()!);
                     Console.Write("Enter Courier ID: ");
@@ -288,38 +202,56 @@ internal class Program
                         CompletionStatus: DeliveryStatus.InProgress,
                         EndDeliveryDate: null
                     );
-
-                    s_dalDelivery.Create(delivery);
+                    s_dal!.Delivery.Create(delivery);
                     Console.WriteLine("Delivery added successfully!");
                     break;
 
                 case 2:
                     Console.Write("Enter ID: ");
                     int id = int.Parse(Console.ReadLine()!);
-                    Console.WriteLine(s_dalDelivery.Read(id));
+                    Console.WriteLine(s_dal!.Delivery.Read(id));
                     break;
 
                 case 3:
-                    foreach (var d in s_dalDelivery.ReadAll())
+                    foreach (var d in s_dal!.Delivery.ReadAll())
                         Console.WriteLine(d);
                     break;
 
                 case 4:
                     Console.Write("Enter ID to delete: ");
                     int delId = int.Parse(Console.ReadLine()!);
-                    s_dalDelivery.Delete(delId);
+                    s_dal!.Delivery.Delete(delId);
                     Console.WriteLine("Delivery deleted.");
                     break;
 
                 case 0:
                     return;
-
-                default:
-                    Console.WriteLine("Invalid choice.");
-                    break;
             }
         }
     }
 
+    // === Config Menu ===
+    private static void ConfigMenu()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n--- Config Menu ---");
+            Console.WriteLine("1. Reset Config");
+            Console.WriteLine("0. Back");
+            Console.Write("Choose: ");
 
+            if (!int.TryParse(Console.ReadLine(), out int choice))
+                continue;
+
+            switch (choice)
+            {
+                case 1:
+                    s_dal!.Config.Reset();
+                    Console.WriteLine("Config Reset successfully.");
+                    break;
+                case 0:
+                    return;
+            }
+        }
+    }
 }

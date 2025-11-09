@@ -7,7 +7,7 @@ namespace Dal;
 /// Provides controlled access to system configuration values 
 /// defined in the internal DalList.Config class.
 /// </summary>
-public class ConfigImplementation : IConfig
+internal class ConfigImplementation : IConfig
 {
     /// <summary>
     /// Gets or sets the current system clock used for simulations and scheduling.
