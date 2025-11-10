@@ -88,7 +88,6 @@ internal class Program
                     s_dal!.Order.Create(order);
                     Console.WriteLine("Order added successfully!");
                     break;
-
                 case 2:
                     Console.Write("Enter ID: ");
                     int id = int.Parse(Console.ReadLine()!);

@@ -85,18 +85,17 @@ public static class Initialization
 
     private static void createDeliveries()
     {
-        List<Order> orders = s_dal.Order.ReadAll();
-        List<Courier> couriers = s_dal.Courier.ReadAll();
+        IEnumerable<Order> orders = s_dal.Order.ReadAll();
+        IEnumerable<Courier> couriers = s_dal.Courier.ReadAll();
 
-        int deliveriesCount = Math.Min(orders.Count, couriers.Count);
-
+        int deliveriesCount = Math.Min(orders.Count(), couriers.Count());
         for (int i = 0; i < deliveriesCount; i++)
         {
             Delivery delivery = new(
                 Id: 0,
-                OrderId: orders[i].Id,
-                CourierId: couriers[i].Id,
-                Type: couriers[i].Type,
+                OrderId: orders.ElementAt(i).Id,
+                CourierId: couriers.ElementAt(i).Id,
+                Type: couriers.ElementAt(i).Type,
                 StartDeliveryDate: DateTime.Now.AddDays(-i * 2),
                 ActualDistance: 5 + i * 0.8,
                 ExpectedDistance: 6 + i * 0.5,

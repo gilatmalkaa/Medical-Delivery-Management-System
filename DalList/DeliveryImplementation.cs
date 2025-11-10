@@ -1,6 +1,8 @@
 ﻿namespace Dal;
 using DalApi;
 using DO;
+using System.Linq;
+
 
 
 internal class DeliveryImplementation : IDelivery
@@ -26,10 +28,11 @@ internal class DeliveryImplementation : IDelivery
         return DataSource.Deliveries.FirstOrDefault(d => d.Id == id);
     }
 
-    public List<Delivery> ReadAll()
-    {
-        return new List<Delivery>(DataSource.Deliveries);
-    }
+    public IEnumerable<Delivery> ReadAll(Func<Delivery, bool>? filter = null)
+    => filter == null
+            ? DataSource.Deliveries.Select(item => item)
+            : DataSource.Deliveries.Where(filter);
+
 
     public void Update(Delivery item)
     {
@@ -53,5 +56,10 @@ internal class DeliveryImplementation : IDelivery
     public void DeleteAll()
     {
         DataSource.Deliveries.Clear();
+    }
+
+    Delivery? ICrud<Delivery>.Read(Func<Delivery, bool> filter)
+    {
+        return DataSource.Deliveries.FirstOrDefault(filter);
     }
 }

@@ -1,6 +1,8 @@
 ﻿namespace Dal;
 using DalApi;
 using DO;
+using System.Linq;
+
 
 
 internal class OrderImplementation : IOrder
@@ -26,10 +28,10 @@ internal class OrderImplementation : IOrder
         return DataSource.Orders.FirstOrDefault(o => o.Id == id);
     }
 
-    public List<Order> ReadAll()
-    {
-        return new List<Order>(DataSource.Orders);
-    }
+    public IEnumerable<Order> ReadAll(Func<Order, bool>? filter = null)
+    => filter == null
+            ? DataSource.Orders.Select(item => item)
+            : DataSource.Orders.Where(filter);
 
     public void Update(Order item)
     {
@@ -53,6 +55,11 @@ internal class OrderImplementation : IOrder
     public void DeleteAll()
     {
         DataSource.Orders.Clear();
+    }
+
+    Order? ICrud<Order>.Read(Func<Order, bool> filter)
+    {
+        return DataSource.Orders.FirstOrDefault(filter);
     }
 }
 
