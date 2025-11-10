@@ -1,4 +1,4 @@
-﻿namespace DalList;
+﻿namespace DalListData;
 
 /// <summary>
 /// Static configuration class used to simulate system constants and running IDs.

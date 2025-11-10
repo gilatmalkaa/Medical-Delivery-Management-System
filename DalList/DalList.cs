@@ -9,16 +9,16 @@ using DalApi;
 /// </summary>
 sealed public class DalList : IDal
 {
-    public IOrder Order => new OrderImplementation();
-    public ICourier Courier => new CourierImplementation();
-    public IDelivery Delivery => new DeliveryImplementation();
-    public IConfig Config => new ConfigImplementation();
+    public IOrder Order { get; } = new OrderImplementation();
+    public ICourier Courier { get; } = new CourierImplementation();
+    public IDelivery Delivery { get; } = new DeliveryImplementation();
+    public IConfig Config { get; } = new ConfigImplementation();
 
     public void ResetDB()
     {
-        DataSource.Orders.Clear();
-        DataSource.Couriers.Clear();
-        DataSource.Deliveries.Clear();
-        DataSource.Config.Reset();
+        Order.DeleteAll();
+        Courier.DeleteAll();
+        Delivery.DeleteAll();
+        Config.Reset();
     }
 }

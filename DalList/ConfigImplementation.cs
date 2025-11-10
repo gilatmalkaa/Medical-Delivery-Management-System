@@ -1,5 +1,6 @@
 ﻿using DalApi;
 namespace Dal;
+using DalListData;
 
 /// <summary>
 /// Implementation class for the configuration interface (IConfig).
@@ -14,8 +15,8 @@ internal class ConfigImplementation : IConfig
     /// </summary>
     public DateTime Clock
     {
-        get => DalList.Config.Clock;
-        set => DalList.Config.Clock = value;
+        get => Config.Clock;
+        set => Config.Clock = value;
     }
 
     /// <summary>
@@ -27,7 +28,7 @@ internal class ConfigImplementation : IConfig
     /// </exception>
     public int MaxRange
     {
-        get => DalList.Config.NextOrderId;
+        get => Config.NextOrderId;
         set => throw new NotSupportedException("MaxRange is read-only in Config.");
     }
 
@@ -37,6 +38,6 @@ internal class ConfigImplementation : IConfig
     /// </summary>
     public void Reset()
     {
-        DalList.Config.Reset();
+        Config.Reset();
     }
 }

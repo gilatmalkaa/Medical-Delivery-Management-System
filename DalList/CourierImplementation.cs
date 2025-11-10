@@ -1,6 +1,8 @@
 ﻿namespace Dal;
 using DalApi;
 using DO;
+using System.Linq;
+
 
 /// <summary>
 /// Implements ICourier — manages Courier data in memory.
@@ -12,7 +14,7 @@ internal class CourierImplementation : ICourier
     /// Throws exception if courier with same ID exists.
     /// </summary>
     public void Create(Courier item)
-    {
+    {   
         if (item.Id == 0)
         {
             int newId = DataSource.Config.NextCourierId;
@@ -38,10 +40,10 @@ internal class CourierImplementation : ICourier
     /// <summary>
     /// Returns a list of all couriers.
     /// </summary>
-    public List<Courier> ReadAll()
-    {
-        return new List<Courier>(DataSource.Couriers);
-    }
+    public IEnumerable<Courier> ReadAll(Func<Courier, bool>? filter = null) //stage 2
+    => filter == null
+            ? DataSource.Couriers.Select(item => item)
+            : DataSource.Couriers.Where(filter);
 
     /// <summary>
     /// Updates an existing courier. Throws exception if not found.
@@ -74,6 +76,11 @@ internal class CourierImplementation : ICourier
     public void DeleteAll()
     {
         DataSource.Couriers.Clear();
+    }
+
+    Courier? ICrud<Courier>.Read(Func<Courier, bool> filter)
+    {
+        return DataSource.Couriers.FirstOrDefault(filter);
     }
 }
 
