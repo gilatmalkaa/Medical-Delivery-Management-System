@@ -1,6 +1,7 @@
 ﻿using DalApi;
 namespace Dal;
 using DalListData;
+using DO;
 
 /// <summary>
 /// Implementation class for the configuration interface (IConfig).
@@ -29,7 +30,8 @@ internal class ConfigImplementation : IConfig
     public int MaxRange
     {
         get => Config.NextOrderId;
-        set => throw new NotSupportedException("MaxRange is read-only in Config.");
+        set => throw new DalUnsupportedOperationException("MaxRange is read-only in Config.");
+
     }
 
     /// <summary>

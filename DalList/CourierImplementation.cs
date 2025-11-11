@@ -24,7 +24,7 @@ internal class CourierImplementation : ICourier
         else
         {
             if (Read(item.Id) != null)
-                throw new Exception($"Courier with ID {item.Id} already exists.");
+                throw new DalAlreadyExistsException($"Courier with ID={item.Id} already exists.");
             DataSource.Couriers.Add(item);
         }
     }
@@ -52,7 +52,7 @@ internal class CourierImplementation : ICourier
     {
         Courier? existing = Read(item.Id);
         if (existing == null)
-            throw new Exception($"Courier with ID={item.Id} does not exist");
+            throw new DalDoesNotExistException($"Courier with ID={item.Id} does not exist.");
 
         DataSource.Couriers.Remove(existing);
         DataSource.Couriers.Add(item);
@@ -65,7 +65,7 @@ internal class CourierImplementation : ICourier
     {
         Courier? courier = Read(id);
         if (courier == null)
-            throw new Exception($"Courier with ID={id} does not exist");
+            throw new DalDoesNotExistException($"Courier with ID={id} does not exist.");
 
         DataSource.Couriers.Remove(courier);
     }
