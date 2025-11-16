@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<NextOrderId>1000</NextOrderId>
+	<NextCourierId>1000</NextCourierId>
+	<NextDeliveryId>1000</NextDeliveryId>
+	<Clock>2025-01-01T00:00:00</Clock>
+</config>
