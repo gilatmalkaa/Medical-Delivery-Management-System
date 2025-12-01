@@ -3,8 +3,17 @@ using DO;
 
 namespace Dal;
 
+/// <summary>
+/// DAL implementation for managing Order entities using XML serialization.
+/// Provides CRUD operations and supports filtering and full list management.
+/// </summary>
 internal class OrderImplementation : IOrder
 {
+    /// <summary>
+    /// Creates a new order in the XML data store.
+    /// Throws <see cref="DalAlreadyExistsException"/> if an order with the same ID already exists.
+    /// </summary>
+    /// <param name="item">The order to add.</param>
     public void Create(Order item)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -16,26 +25,49 @@ internal class OrderImplementation : IOrder
         XMLTools.SaveListToXMLSerializer(list, Config.s_orders_xml);
     }
 
+    /// <summary>
+    /// Reads an order by its unique ID.
+    /// Returns null if the order does not exist.
+    /// </summary>
+    /// <param name="id">The unique order ID.</param>
+    /// <returns>The order with the specified ID or null if not found.</returns>
     public Order? Read(int id)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
         return list.FirstOrDefault(o => o.Id == id);
     }
 
+    /// <summary>
+    /// Reads the first order matching the specified filter.
+    /// Returns null if no order satisfies the filter.
+    /// </summary>
+    /// <param name="filter">A predicate function to filter orders.</param>
+    /// <returns>The first matching order or null if not found.</returns>
     public Order? Read(Func<Order, bool> filter)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
         return list.FirstOrDefault(filter);
     }
 
+    /// <summary>
+    /// Reads all orders from the XML data store.
+    /// Optionally applies a filter to return a subset of orders.
+    /// </summary>
+    /// <param name="filter">Optional predicate to filter the orders.</param>
+    /// <returns>An enumerable of orders.</returns>
     public IEnumerable<Order> ReadAll(Func<Order, bool>? filter = null)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
         return filter == null ? list : list.Where(filter);
     }
 
+    /// <summary>
+    /// Updates an existing order in the XML data store.
+    /// Throws <see cref="DalDoesNotExistException"/> if the order does not exist.
+    /// </summary>
+    /// <param name="item">The order with updated information.</param>
     public void Update(Order item)
-    {   
+    {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
 
         int index = list.FindIndex(o => o.Id == item.Id);
@@ -46,6 +78,11 @@ internal class OrderImplementation : IOrder
         XMLTools.SaveListToXMLSerializer(list, Config.s_orders_xml);
     }
 
+    /// <summary>
+    /// Deletes an order by its unique ID.
+    /// Throws <see cref="DalDoesNotExistException"/> if the order does not exist.
+    /// </summary>
+    /// <param name="id">The unique order ID to delete.</param>
     public void Delete(int id)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -56,9 +93,11 @@ internal class OrderImplementation : IOrder
         XMLTools.SaveListToXMLSerializer(list, Config.s_orders_xml);
     }
 
+    /// <summary>
+    /// Deletes all orders from the XML data store.
+    /// </summary>
     public void DeleteAll()
     {
         XMLTools.SaveListToXMLSerializer(new List<Order>(), Config.s_orders_xml);
     }
 }
-

@@ -13,7 +13,8 @@ namespace DalTest
         /// <summary>
         /// DAL instance used for performing all CRUD operations.
         /// </summary>
-        static readonly IDal s_dal = new DalList();
+        // static readonly IDal s_dal = new DalList(); //stage 2  (תשאיר בהערה)
+        static readonly IDal s_dal = new DalXml(); //stage 3
 
         /// <summary>
         /// Main entry point of the program.
