@@ -13,8 +13,9 @@ namespace DalTest
         /// <summary>
         /// DAL instance used for performing all CRUD operations.
         /// </summary>
-        // static readonly IDal s_dal = new DalList(); //stage 2  (תשאיר בהערה)
-        static readonly IDal s_dal = new DalXml(); //stage 3
+        // static readonly IDal s_dal = new DalList(); //stage 2  
+        //static readonly IDal s_dal = new DalXml(); //stage 3
+        static readonly IDal s_dal = Factory.Get; //stage 4 
 
         /// <summary>
         /// Main entry point of the program.
@@ -25,7 +26,7 @@ namespace DalTest
         {
             try
             {
-                Initialization.Do(s_dal);
+                Initialization.Do();
                 Console.WriteLine("Initialization completed successfully!");
             }
             catch (ArgumentNullException ex)

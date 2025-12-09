@@ -28,9 +28,9 @@ public static class Initialization
     /// </summary>
     /// <param name="dal">DAL instance used to perform the initialization.</param>
     /// <exception cref="ArgumentNullException">Thrown if the provided DAL instance is null.</exception>
-    public static void Do(IDal dal)
+    public static void Do()
     {
-        s_dal = dal ?? throw new ArgumentNullException(nameof(dal), "DAL object cannot be null!");
+        s_dal = Factory.Get ?? throw new NullReferenceException("DAL cannot be null!");
         Console.WriteLine("Reset data...");
         s_dal.ResetDB();
         createCouriers();

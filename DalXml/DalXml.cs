@@ -7,8 +7,11 @@ namespace Dal;
 /// Provides access to all entity implementations (Courier, Order, Delivery, Config)
 /// and supports full database reset.
 /// </summary>
-public sealed class DalXml : IDal
+sealed internal class DalXml : IDal
 {
+    // Singleton instance
+    public static IDal Instance { get; } = new DalXml();
+
     /// <summary>
     /// Gets the courier data access implementation.
     /// </summary>
@@ -28,6 +31,9 @@ public sealed class DalXml : IDal
     /// Gets the configuration data access implementation.
     /// </summary>
     public IConfig Config { get; } = new ConfigImplementation();
+
+    // Private constructor
+    private DalXml() { }
 
     /// <summary>
     /// Performs a full reset of the XML "database".

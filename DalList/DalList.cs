@@ -6,8 +6,11 @@ using DalApi;
 /// Provides access to all DAL entities: Orders, Couriers, Deliveries, and Config.
 /// This class serves as the central entry point for CRUD operations in the DAL layer.
 /// </summary>
-sealed public class DalList : IDal
+sealed internal class DalList : IDal
 {
+    // Singleton instance
+    public static IDal Instance { get; } = new DalList();
+
     /// <summary>
     /// Gets the <see cref="IOrder"/> implementation for managing orders.
     /// Allows CRUD operations on Order entities.
@@ -31,6 +34,10 @@ sealed public class DalList : IDal
     /// Allows resetting and updating global configuration settings.
     /// </summary>
     public IConfig Config { get; } = new ConfigImplementation();
+
+    // Private constructor
+    private DalList() { }
+
 
     /// <summary>
     /// Resets the entire in-memory database to its initial state.
