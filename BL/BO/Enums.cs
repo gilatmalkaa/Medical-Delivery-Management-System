@@ -8,13 +8,12 @@ public enum DeliveryType
     Car
 }
 
-
 public enum DeliveryStatus
 {
-    InProgress,  
-    Delivered,    
-    Failed,     
-    Canceled      
+    InProgress,
+    Delivered,
+    Failed,
+    Canceled
 }
 
 public enum OrderType
@@ -26,19 +25,17 @@ public enum OrderType
 
 public enum OrderStatus
 {
-    Created,    
-    Assigned,    
-    InDelivery, 
-    Delivered,    
-    Failed      
+    Created,
+    Assigned,
+    InDelivery,
+    Delivered,
+    Failed
 }
 
 public enum ScheduleStatus
 {
     OnTime,
     SlightDelay,
-    Late
+    Late,
+    Scheduled
 }
-
-
-

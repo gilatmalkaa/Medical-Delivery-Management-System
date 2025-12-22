@@ -1,15 +1,25 @@
-﻿namespace BO;
+﻿using Helpers;
 
+namespace BO;
+
+/// <summary>
+/// Configuration values exposed to the presentation layer.
+/// </summary>
 public class Config
 {
-    public int MaxRange { get; init; }
-    public double FootSpeed { get; init; }
-    public double BikeSpeed { get; init; }
-    public double MotorcycleSpeed { get; init; }
-    public double CarSpeed { get; init; }
-    public int SampleExpirationMinutes { get; init; }
-    public int MaxDeliveryDurationMinutes { get; init; }
-    public double BaseDeliveryPrice { get; init; }
-    public double PricePerKm { get; init; }
+    public DateTime Clock { get; set; }
+
+    public int MaxRange { get; set; }
+    public int SampleExpirationMinutes { get; set; }
+    public int MaxDeliveryDurationMinutes { get; set; }
+
+    public double FootSpeed { get; set; }
+    public double BikeSpeed { get; set; }
+    public double MotorcycleSpeed { get; set; }
+    public double CarSpeed { get; set; }
+
+    public double BaseDeliveryPrice { get; set; }
+    public double PricePerKm { get; set; }
+
     public override string ToString() => this.ToStringProperty();
 }

@@ -44,6 +44,20 @@ internal static class DataSource
         /// </summary>
         internal static int NextDeliveryId = 3000;
 
+        internal static DateTime Clock = DateTime.Now;
+
+        internal static int MaxRange = 100;
+        internal static int SampleExpirationMinutes = 60;
+        internal static int MaxDeliveryDurationMinutes = 120;
+
+        internal static double FootSpeed = 4.0;
+        internal static double BikeSpeed = 15.0;
+        internal static double MotorcycleSpeed = 40.0;
+        internal static double CarSpeed = 50.0;
+
+        internal static double BaseDeliveryPrice = 20.0;
+        internal static double PricePerKm = 5.0;
+
         /// <summary>
         /// Resets all running IDs back to their initial starting values.
         /// </summary>
