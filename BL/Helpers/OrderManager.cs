@@ -8,6 +8,8 @@ namespace Helpers;
 
 internal static class OrderManager
 {
+    internal static ObserverManager Observers = new(); // stage 5
+
     private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
     internal static BO.Order Get(int id)
@@ -71,6 +73,8 @@ internal static class OrderManager
             OpenDate = order.CreatedAt
         };
         s_dal.Order.Create(newDo);
+
+        Observers.NotifyListUpdated(); // stage 5 
     }
 
     internal static BO.Order Read(int id) => Get(id);
@@ -98,13 +102,27 @@ internal static class OrderManager
         };
 
         s_dal.Order.Update(updated);
+        Observers.NotifyItemUpdated(order.Id); // stage 5 
+        Observers.NotifyListUpdated();         // stage 5 
     }
 
-    internal static void Delete(int id) => s_dal.Order.Delete(id);
-    internal static void DeleteAll() => s_dal.Order.DeleteAll();
+    internal static void Delete(int id)
+    {
+        s_dal.Order.Delete(id);
 
+        Observers.NotifyItemUpdated(id); // stage 5 
+        Observers.NotifyListUpdated();   // stage 5 
+    }
+    internal static void DeleteAll()
+    {
+        s_dal.Order.DeleteAll();
+
+        Observers.NotifyListUpdated(); // stage 5 
+    }
     internal static BO.Order Read(Func<BO.Order, bool> filter)
     {
         throw new NotImplementedException();
     }
+
+
 }

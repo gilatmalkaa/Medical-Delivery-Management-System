@@ -1,6 +1,6 @@
 ﻿namespace BlApi;
 
-public interface IDelivery
+public interface IDelivery : IObservable
 {
     public void Create(int orderId, int courierId);
     public void UpdateStatus(int deliveryId, BO.DeliveryStatus status);

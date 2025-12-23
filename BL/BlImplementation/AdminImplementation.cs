@@ -19,4 +19,20 @@ internal class AdminImplementation : IAdmin
     public void InitializeDB() => AdminManager.InitializeDB();
 
     public void ResetDB() => AdminManager.ResetDB();
+
+    #region Stage 5
+
+    public void AddClockObserver(Action clockObserver) =>
+        AdminManager.ClockUpdatedObservers += clockObserver;
+
+    public void RemoveClockObserver(Action clockObserver) =>
+        AdminManager.ClockUpdatedObservers -= clockObserver;
+
+    public void AddConfigObserver(Action configObserver) =>
+        AdminManager.ConfigUpdatedObservers += configObserver;
+
+    public void RemoveConfigObserver(Action configObserver) =>
+        AdminManager.ConfigUpdatedObservers -= configObserver;
+
+    #endregion
 }

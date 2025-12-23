@@ -1,0 +1,51 @@
+﻿<Window x:Class="PL.Courier.CourierListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Courier List"
+        Height="640"
+        Width="800">
+
+    <!-- External Grid: main screen layout -->
+    <Grid>
+
+        <!-- Main rows: header / list / footer -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="500"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Internal Grid: header area -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Screen title -->
+            <Label Content="Couriers List"
+                   Grid.Column="0"
+                   VerticalAlignment="Center"/>
+
+            <!-- Sorting options -->
+            <ComboBox Grid.Column="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Couriers list -->
+        <ListView Grid.Row="1">
+            <!-- Couriers will be displayed here -->
+        </ListView>
+
+        <!-- Add Courier button -->
+        <Button Grid.Row="2"
+                Content="Add Courier"
+                HorizontalAlignment="Right"
+                Margin="10"/>
+
+    </Grid>
+</Window>

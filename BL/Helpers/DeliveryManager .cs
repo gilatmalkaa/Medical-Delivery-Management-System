@@ -8,6 +8,8 @@ namespace Helpers;
 
 internal static class DeliveryManager
 {
+    internal static ObserverManager Observers = new(); // stage 5
+
     private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
     internal static BO.DeliveryPerOrderInList Get(int id)
@@ -63,6 +65,9 @@ internal static class DeliveryManager
         );
 
         s_dal.Delivery.Create(newDelivery);
+
+        Observers.NotifyListUpdated();          // stage 5 
+        Observers.NotifyItemUpdated(orderId);   // stage 5 
     }
 
     internal static void UpdateStatus(int deliveryId, BO.DeliveryStatus newStatus)
@@ -86,8 +91,22 @@ internal static class DeliveryManager
         };
 
         s_dal.Delivery.Update(updated);
+
+        Observers.NotifyItemUpdated(deliveryId); // stage 5 
+        Observers.NotifyListUpdated();           // stage 5 
     }
 
-    internal static void Delete(int id) => s_dal.Delivery.Delete(id);
-    internal static void DeleteAll() => s_dal.Delivery.DeleteAll();
+    internal static void Delete(int id)
+    {
+        s_dal.Delivery.Delete(id);
+
+        Observers.NotifyItemUpdated(id); // stage 5 
+        Observers.NotifyListUpdated();   // stage 5 
+    }
+    internal static void DeleteAll()
+    {
+        s_dal.Delivery.DeleteAll();
+
+        Observers.NotifyListUpdated(); // stage 5 
+    }
 }

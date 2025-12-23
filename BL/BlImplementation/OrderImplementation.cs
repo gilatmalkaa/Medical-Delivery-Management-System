@@ -51,4 +51,17 @@ internal class OrderImplementation : IOrder
     {
         return OrderManager.GetAll(); // implement GetAll in OrderManager
     }
+
+   //region Stage 5 - Observer
+    public void AddObserver(Action listObserver) =>
+        OrderManager.Observers.AddListObserver(listObserver);
+
+    public void AddObserver(int id, Action observer) =>
+        OrderManager.Observers.AddObserver(id, observer);
+
+    public void RemoveObserver(Action listObserver) =>
+        OrderManager.Observers.RemoveListObserver(listObserver);
+
+    public void RemoveObserver(int id, Action observer) =>
+        OrderManager.Observers.RemoveObserver(id, observer);
 }

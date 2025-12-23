@@ -8,6 +8,8 @@ namespace Helpers;
 
 internal static class CourierManager
 {
+    internal static ObserverManager Observers = new(); // stage 5
+
     private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
     internal static void Create(BO.Courier courier)
@@ -26,6 +28,8 @@ internal static class CourierManager
         };
         
         s_dal.Courier.Create(newDo);
+        Observers.NotifyListUpdated(); // stage 5 
+
     }
 
     internal static BO.Courier Get(int id)
@@ -71,6 +75,8 @@ internal static class CourierManager
         };
 
         s_dal.Courier.Update(updated);
+        Observers.NotifyItemUpdated(courier.Id); // stage 5 
+        Observers.NotifyListUpdated();           // stage 5 
     }
 
     internal static IEnumerable<BO.CourierInList> GetAll()
@@ -84,6 +90,17 @@ internal static class CourierManager
             });
     }
 
-    internal static void Delete(int id) => s_dal.Courier.Delete(id);
-    internal static void DeleteAll() => s_dal.Courier.DeleteAll();
+    internal static void Delete(int id)
+    {
+        s_dal.Courier.Delete(id);
+
+        Observers.NotifyItemUpdated(id); // stage 5 
+        Observers.NotifyListUpdated();   // stage 5 
+    }
+    internal static void DeleteAll()
+    {
+        s_dal.Courier.DeleteAll();
+
+        Observers.NotifyListUpdated(); // stage 5 
+    }
 }
