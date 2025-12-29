@@ -1,6 +1,10 @@
 ﻿using BlApi;
 using BO;
+using PL.Courier;
+using PL.Delivery;
+using PL.Order;
 using System.Windows;
+using System.Windows.Input;
 
 
 namespace PL.Admin
@@ -139,6 +143,95 @@ namespace PL.Admin
             // d. Register config observer
             s_bl.Admin.AddConfigObserver(configObserver);
         }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            s_bl.Admin.RemoveClockObserver(clockObserver);
+
+            s_bl.Admin.RemoveConfigObserver(configObserver);
+        }
+
+        private void btnCouriers_Click(object sender, RoutedEventArgs e)
+        {
+            new CourierListWindow().Show();
+        }
+
+        private void btnDeliveries_Click(object sender, RoutedEventArgs e)
+        {
+            new DeliveryListWindow().Show();
+        }
+
+        private void btnOrders_Click(object sender, RoutedEventArgs e)
+        {
+            new OrderListWindow().Show();
+        }
+
+        private void CloseOtherWindows()
+        {
+            foreach (Window w in Application.Current.Windows)
+                if (w != this)
+                    w.Close();
+        }
+
+        // Helper: wait cursor
+        private void RunWithWaitCursor(Action action)
+        {
+            Mouse.OverrideCursor = Cursors.Wait;
+            try { action(); }
+            finally { Mouse.OverrideCursor = null; }
+        }
+
+        private void btnInitDB_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(
+                "Are you sure you want to initialize the database?\n" +
+                "Existing data will be deleted and demo data will be created.",
+                "Initialize Database",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            CloseOtherWindows();
+
+            RunWithWaitCursor(() =>
+            {
+                s_bl.Admin.InitializeDB();
+            });
+
+            MessageBox.Show(
+                "Database was successfully initialized.",
+                "Operation Completed",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        private void btnResetDB_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(
+                "Are you sure you want to reset the database?",
+                "Reset Database",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            CloseOtherWindows();
+
+            RunWithWaitCursor(() =>
+            {
+                s_bl.Admin.ResetDB();
+            });
+
+            MessageBox.Show(
+                "Database was successfully reset.",
+                "Operation Completed",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
 
         public AdminWindow()
         {

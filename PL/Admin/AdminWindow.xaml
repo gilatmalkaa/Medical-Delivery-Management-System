@@ -2,12 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         mc:Ignorable="d"
         Title="Admin Panel - Medical Delivery System"
         Height="500"
         Width="800"
-        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
+        Closed="AdminWindow_Closed">
+
 
     <!-- Main layout grid -->
     <Grid Margin="10">
@@ -133,22 +135,36 @@
 
         <!-- Navigation Section -->
         <StackPanel Grid.Row="3"
-                    Orientation="Horizontal"
-                    Margin="0,15,0,15">
+            Orientation="Horizontal"
+            Margin="0,15,0,15">
 
-            <Button Content="Orders List" Margin="5"/>
-            <Button Content="Couriers List" Margin="5"/>
-            <Button Content="Deliveries List" Margin="5"/>
+            <Button Content="Manage Couriers"
+            Margin="5"
+            Click="btnCouriers_Click"/>
+
+            <Button Content="Manage Deliveries"
+            Margin="5"
+            Click="btnDeliveries_Click"/>
+
+            <Button Content="Manage Orders"
+            Margin="5"
+            Click="btnOrders_Click"/>
 
         </StackPanel>
 
+
         <!-- Database Actions -->
         <StackPanel Grid.Row="4"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
+            Orientation="Horizontal"
+            HorizontalAlignment="Right">
 
-            <Button Content="Initialize Database" Margin="5"/>
-            <Button Content="Reset Database" Margin="5"/>
+            <Button Content="Initialize Database"
+            Margin="5"
+            Click="btnInitDB_Click"/>
+
+            <Button Content="Reset Database"
+            Margin="5"
+            Click="btnResetDB_Click"/>
 
         </StackPanel>
 

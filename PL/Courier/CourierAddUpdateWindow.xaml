@@ -7,6 +7,9 @@
         mc:Ignorable="d"
         Title="CourierAddUpdateWindow" Height="450" Width="800">
     <Grid>
+        <ComboBox
+        ItemsSource="{Binding Source={StaticResource CourierTypeCollectionKey}}"
+        SelectedItem="{Binding Type}"/>
         
     </Grid>
 </Window>

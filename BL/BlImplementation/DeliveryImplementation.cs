@@ -14,6 +14,18 @@ internal class DeliveryImplementation : IDelivery
     public IEnumerable<DeliveryPerOrderInList> GetByOrder(int orderId)
         => DeliveryManager.GetDeliveriesByOrder(orderId);
 
+    public IEnumerable<DeliveryPerOrderInList> ReadAll(
+        Func<DeliveryPerOrderInList, bool>? filter = null)
+    {
+        var deliveries =
+            from order in OrderManager.ReadAll()          
+            from delivery in DeliveryManager.GetDeliveriesByOrder(order.Id)
+            select delivery;
+
+        return filter == null
+            ? deliveries
+            : deliveries.Where(filter);
+    }
     public void Create(int orderId, int courierId)
         => DeliveryManager.Create(orderId, courierId);
 

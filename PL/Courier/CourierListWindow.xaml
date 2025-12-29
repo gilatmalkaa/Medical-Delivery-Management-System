@@ -6,7 +6,8 @@
         mc:Ignorable="d"
         Title="Courier List"
         Height="640"
-        Width="800">
+        Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
     <!-- External Grid: main screen layout -->
     <Grid>
@@ -36,16 +37,29 @@
                       VerticalAlignment="Center"/>
         </Grid>
 
-        <!-- Couriers list -->
-        <ListView Grid.Row="1">
-            <!-- Couriers will be displayed here -->
-        </ListView>
+        <ListView Grid.Row="1"
+          ItemsSource="{Binding Path=CourierList}" />
 
-        <!-- Add Courier button -->
-        <Button Grid.Row="2"
-                Content="Add Courier"
-                HorizontalAlignment="Right"
-                Margin="10"/>
+        <!-- Footer Row -->
+        <Grid Grid.Row="2"
+      Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ComboBox – Courier Type Filter -->
+            <ComboBox Grid.Column="0"
+              ItemsSource="{Binding Source={StaticResource CourierTypeCollectionKey}}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Center"/>
+
+            <!-- Add Courier Button -->
+            <Button Grid.Column="1"
+            Content="Add Courier"
+            Margin="10 0 0 0"
+            HorizontalAlignment="Right"/>
+        </Grid>
 
     </Grid>
 </Window>

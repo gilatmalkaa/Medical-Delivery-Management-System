@@ -6,7 +6,8 @@
         mc:Ignorable="d"
         Title="Delivery List"
         Height="640"
-        Width="800">
+        Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
     <!-- External Grid: main screen layout -->
     <Grid>
@@ -42,15 +43,16 @@
         </Grid>
 
         <!-- Deliveries list -->
-        <ListView Grid.Row="1">
-            <!-- Deliveries will be displayed here -->
-        </ListView>
-
+        <ListView Grid.Row="1"
+          ItemsSource="{Binding Path=DeliveryList}" />
+        
         <!-- Add Delivery button -->
         <Button Grid.Row="2"
                 Content="Add Delivery"
                 HorizontalAlignment="Right"
                 Margin="10"/>
+        
+
 
     </Grid>
 </Window>

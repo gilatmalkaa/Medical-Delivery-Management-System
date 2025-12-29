@@ -5,4 +5,7 @@ public interface IDelivery : IObservable
     public void Create(int orderId, int courierId);
     public void UpdateStatus(int deliveryId, BO.DeliveryStatus status);
     public BO.DeliveryPerOrderInList Get(int id);
+
+    IEnumerable<BO.DeliveryPerOrderInList> ReadAll(
+    Func<BO.DeliveryPerOrderInList, bool>? filter = null);
 }

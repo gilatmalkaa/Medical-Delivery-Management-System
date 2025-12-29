@@ -19,6 +19,8 @@ namespace PL
         public MainWindow()
         {
             InitializeComponent();
+            var t = new DeliveryStatusCollection();
+
         }
     }
 }

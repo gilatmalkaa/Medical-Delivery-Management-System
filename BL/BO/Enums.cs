@@ -1,5 +1,12 @@
 ﻿namespace BO;
 
+public enum CourierType
+{
+    Foot,
+    Bicycle,
+    Motorcycle,
+    Car
+}
 public enum DeliveryType
 {
     Foot,
@@ -25,6 +32,7 @@ public enum OrderType
 
 public enum OrderStatus
 {
+    All,
     Created,
     Assigned,
     InDelivery,

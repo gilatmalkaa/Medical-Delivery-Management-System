@@ -7,6 +7,13 @@
         mc:Ignorable="d"
         Title="OrderAddWindow" Height="450" Width="800">
     <Grid>
-        
+
+        <ComboBox
+        ItemsSource="{Binding Source={StaticResource OrderStatusCollectionKey}}"
+        Grid.Column="1"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch" />
+
+
     </Grid>
 </Window>

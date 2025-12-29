@@ -16,64 +16,72 @@ internal class ConfigImplementation : IConfig
         set => Config.Clock = value;
     }
 
+    // ==== MAPPED PROPERTIES (names expected by BL) ====
+
+    // MaxRange ← mapped to AirDistance (km)
     public int MaxRange
     {
-        get => Config.MaxRange;
-        set => Config.MaxRange = value;
+        get => (int)Config.AirDistance;
+        set => Config.AirDistance = value;
     }
 
+    // FootSpeed ← WalkingSpeed
     public double FootSpeed
     {
-        get => Config.FootSpeed;
-        set => Config.FootSpeed = value;
+        get => Config.WalkingSpeed;
+        set => Config.WalkingSpeed = value;
     }
 
+    // BikeSpeed ← VehicleSpeed
     public double BikeSpeed
     {
-        get => Config.BikeSpeed;
-        set => Config.BikeSpeed = value;
+        get => Config.VehicleSpeed;
+        set => Config.VehicleSpeed = value;
     }
 
+    // MotorcycleSpeed ← MotorcycleSpeed (exists directly)
     public double MotorcycleSpeed
     {
         get => Config.MotorcycleSpeed;
         set => Config.MotorcycleSpeed = value;
     }
 
+    // CarSpeed ← VehicleSpeed (same source)
     public double CarSpeed
     {
-        get => Config.CarSpeed;
-        set => Config.CarSpeed = value;
+        get => Config.VehicleSpeed;
+        set => Config.VehicleSpeed = value;
     }
 
+    // SampleExpirationMinutes ← IdleTimeRange
     public int SampleExpirationMinutes
     {
-        get => Config.SampleExpirationMinutes;
-        set => Config.SampleExpirationMinutes = value;
+        get => (int)Config.IdleTimeRange.TotalMinutes;
+        set => Config.IdleTimeRange = TimeSpan.FromMinutes(value);
     }
 
+    // MaxDeliveryDurationMinutes ← DeliveryWindow
     public int MaxDeliveryDurationMinutes
     {
-        get => Config.MaxDeliveryDurationMinutes;
-        set => Config.MaxDeliveryDurationMinutes = value;
+        get => (int)Config.DeliveryWindow.TotalMinutes;
+        set => Config.DeliveryWindow = TimeSpan.FromMinutes(value);
     }
 
+    // Prices (add defaults if not originally defined)
     public double BaseDeliveryPrice
     {
-        get => Config.BaseDeliveryPrice;
-        set => Config.BaseDeliveryPrice = value;
+        get => _baseDeliveryPrice;
+        set => _baseDeliveryPrice = value;
     }
+    private static double _baseDeliveryPrice = 25;
 
     public double PricePerKm
     {
-        get => Config.PricePerKm;
-        set => Config.PricePerKm = value;
+        get => _pricePerKm;
+        set => _pricePerKm = value;
     }
+    private static double _pricePerKm = 2.5;
 
-    /// <summary>
-    /// Resets all configuration settings and counters 
-    /// to their initial values as defined in DalList.Config.
-    /// </summary>
     public void Reset()
     {
         Config.Reset();

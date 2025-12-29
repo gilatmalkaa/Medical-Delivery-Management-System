@@ -1,12 +1,6 @@
 ﻿using DalApi;
 namespace Dal;
-using DO;
 
-/// <summary>
-/// Implementation class for the configuration interface (IConfig).
-/// Provides controlled access to system configuration values 
-/// defined in the internal DalList.Config class.
-/// </summary>
 internal class ConfigImplementation : IConfig
 {
     public DateTime Clock
@@ -15,54 +9,64 @@ internal class ConfigImplementation : IConfig
         set => Config.Clock = value;
     }
 
-    public int SampleExpirationMinutes
-    {
-        get => Config.SampleExpirationMinutes;
-        set => Config.SampleExpirationMinutes = value;
-    }
+    // DalXml does not manage these values – return defaults
 
-    public int MaxDeliveryDurationMinutes
+    public int MaxRange
     {
-        get => Config.MaxDeliveryDurationMinutes;
-        set => Config.MaxDeliveryDurationMinutes = value;
+        get => 0;
+        set { /* not supported in DalXml */ }
     }
 
     public double FootSpeed
     {
-        get => Config.FootSpeed;
-        set => Config.FootSpeed = value;
+        get => 0;
+        set { }
     }
 
     public double BikeSpeed
     {
-        get => Config.BikeSpeed;
-        set => Config.BikeSpeed = value;
+        get => 0;
+        set { }
+    }
+
+    public double MotorcycleSpeed
+    {
+        get => 0;
+        set { }
     }
 
     public double CarSpeed
     {
-        get => Config.CarSpeed;
-        set => Config.CarSpeed = value;
+        get => 0;
+        set { }
+    }
+
+    public int SampleExpirationMinutes
+    {
+        get => 0;
+        set { }
+    }
+
+    public int MaxDeliveryDurationMinutes
+    {
+        get => 0;
+        set { }
     }
 
     public double PricePerKm
     {
-        get => Config.PricePerKm;
-        set => Config.PricePerKm = value;
+        get => 0;
+        set { }
     }
 
     public double BaseDeliveryPrice
     {
-        get => Config.BaseDeliveryPrice;
-        set => Config.BaseDeliveryPrice = value;
+        get => 0;
+        set { }
     }
 
-    /// <summary>
-    /// Resets all static configuration data to initial values.
-    /// </summary>
     public void Reset()
     {
         Config.Reset();
     }
 }
-
