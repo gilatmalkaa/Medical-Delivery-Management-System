@@ -30,6 +30,15 @@ namespace PL.Order
             set => SetValue(OrderListProperty, value);
         }
 
+        private void lsvOrdersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (SelectedOrder == null)
+                return;
+
+            new OrderDetailsWindow(SelectedOrder.OrderId).ShowDialog();
+        }
+
+
         public static readonly DependencyProperty OrderListProperty =
             DependencyProperty.Register(
                 nameof(OrderList),
@@ -86,5 +95,15 @@ namespace PL.Order
             var win = new OrderDetailsWindow(0);
             win.ShowDialog();
         }
+
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(
+                "Deleting an order is not allowed in the system.",
+                "Operation not supported",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
     }
 }

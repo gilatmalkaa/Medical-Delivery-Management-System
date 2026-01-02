@@ -1,4 +1,5 @@
 ﻿using BlApi;
+using BO;
 using Helpers;
 
 internal class OrderImplementation : IOrder
@@ -64,4 +65,14 @@ internal class OrderImplementation : IOrder
 
     public void RemoveObserver(int id, Action observer) =>
         OrderManager.Observers.RemoveObserver(id, observer);
+
+    Order IOrder.Create(Order order)
+    {
+        throw new NotImplementedException();
+    }
+
+    Order IOrder.Update(Order order)
+    {
+        throw new NotImplementedException();
+    }
 }

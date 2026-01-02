@@ -3,17 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:PL">
     <Application.Resources>
-
-        <!-- Enums Collections -->
         <local:OrderStatusCollection x:Key="OrderStatusCollectionKey"/>
         <local:DeliveryStatusCollection x:Key="DeliveryStatusCollectionKey"/>
         <local:CourierTypeCollection x:Key="CourierTypeCollectionKey"/>
         <local:DeliveryTypeCollection x:Key="DeliveryTypeCollectionKey"/>
         <local:ScheduleStatusCollection x:Key="ScheduleStatusCollectionKey"/>
-
-        <!-- Converters -->
         <local:ConvertUpdateToTrue x:Key="ConvertUpdateToTrueKey"/>
         <local:ConvertUpdateToVisible x:Key="ConvertUpdateToVisibleKey"/>
-        
     </Application.Resources>
 </Application>

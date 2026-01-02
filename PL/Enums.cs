@@ -40,6 +40,7 @@ namespace PL
         public IEnumerator GetEnumerator() => _enums.GetEnumerator();
     }
 
+    // ===== ScheduleStatus =====
     public class ScheduleStatusCollection : IEnumerable
     {
         private static readonly IEnumerable<BO.ScheduleStatus> _enums =

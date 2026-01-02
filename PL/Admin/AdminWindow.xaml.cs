@@ -144,7 +144,7 @@ namespace PL.Admin
             s_bl.Admin.AddConfigObserver(configObserver);
         }
 
-        private void MainWindow_Closed(object sender, EventArgs e)
+        private void AdminWindow_Closed(object sender, EventArgs e)
         {
             s_bl.Admin.RemoveClockObserver(clockObserver);
 

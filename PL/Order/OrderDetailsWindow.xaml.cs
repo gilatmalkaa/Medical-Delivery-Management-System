@@ -21,33 +21,14 @@ namespace PL.Order
     /// </summary>
     /// 
 
-    public class ConvertUpdateToTrue : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-            (string)value == "Update";
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
-            throw new NotImplementedException();
-    }
-
-    public class ConvertUpdateToVisible : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-            (string)value == "Update"
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
-            throw new NotImplementedException();
-    }
-
-
     public partial class OrderDetailsWindow : Window
     {
         public int Id { get; set; }
         public string ButtonText { get; set; }
 
         static readonly IBl s_bl = BlApi.Factory.Get();
+
+        private readonly Action _orderObserver;
 
 
         public BO.Order? CurrentOrder
@@ -63,11 +44,16 @@ namespace PL.Order
                 typeof(OrderDetailsWindow),
                 new PropertyMetadata(null));
 
-
         public OrderDetailsWindow(int id)
         {
             InitializeComponent();
             DataContext = this;
+
+            _orderObserver = () =>
+            {
+                if (CurrentOrder != null)
+                    CurrentOrder = s_bl.Orders.Get(CurrentOrder.Id); 
+            };
 
             if (id == 0)
             {
@@ -78,9 +64,19 @@ namespace PL.Order
             {
                 CurrentOrder = s_bl.Orders.Get(id);
                 ButtonText = "Update";
+
+                if (CurrentOrder!.Id != 0)
+                    s_bl.Orders.AddObserver(CurrentOrder.Id, _orderObserver);
             }
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            if (CurrentOrder != null && CurrentOrder.Id != 0)
+                s_bl.Orders.RemoveObserver(CurrentOrder.Id, _orderObserver);
+        }
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -95,19 +91,26 @@ namespace PL.Order
 
                 this.Close();   
             }
-            catch (BO.BlException ex)
+            catch (BO.BlDoesNotExistException ex)
             {
                 MessageBox.Show(ex.Message,
-                                "Validation / Business Error",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
+                    "Validation / Business Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
-            catch (Exception ex)
+            catch (BO.BlAlreadyExistsException ex)
             {
-                MessageBox.Show("Unexpected error:\n" + ex.Message,
-                                "Error",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
+                MessageBox.Show(ex.Message,
+                    "Validation / Business Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            catch (BO.BlNullPropertyException ex)
+            {
+                MessageBox.Show(ex.Message,
+                    "Validation / Business Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
