@@ -17,7 +17,8 @@ using System.Windows.Shapes;
 namespace PL.Courier
 {
     /// <summary>
-    /// Interaction logic for CourierListWindow.xaml
+    /// Displays list of couriers.
+    /// Uses dependency property binding and reads data from BL.
     /// </summary>
     public partial class CourierListWindow : Window
     {

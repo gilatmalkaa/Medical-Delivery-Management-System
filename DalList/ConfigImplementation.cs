@@ -3,10 +3,11 @@ namespace Dal;
 using DalListData;
 using DO;
 
+
 /// <summary>
-/// Implementation class for the configuration interface (IConfig).
-/// Provides controlled access to system configuration values 
-/// defined in the internal DalList.Config class.
+/// DAL implementation of system configuration.
+/// Reads and writes configuration from XML storage.
+/// Some values are not managed in XML DAL and therefore return defaults.
 /// </summary>
 internal class ConfigImplementation : IConfig
 {

@@ -2,6 +2,10 @@
 
 namespace BO;
 
+/// <summary>
+/// Lightweight representation of order used in list screens.
+/// Provides summary timing and status information.
+/// </summary>
 public class OrderInList
 {
     public int? DeliveryId { get; init; }

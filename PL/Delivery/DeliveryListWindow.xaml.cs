@@ -18,8 +18,10 @@ using System.Windows.Shapes;
 namespace PL.Delivery
 {
     /// <summary>
-    /// Interaction logic for DeliveryListWindow.xaml
+    /// Displays list of deliveries.
+    /// Supports observer pattern and automatic refresh.
     /// </summary>
+ 
     public partial class DeliveryListWindow : Window
     {
 

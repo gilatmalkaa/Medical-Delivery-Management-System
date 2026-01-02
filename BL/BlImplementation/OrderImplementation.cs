@@ -2,58 +2,43 @@
 using BO;
 using Helpers;
 
+/// <summary>
+/// Implementation of the order business logic service.
+/// Delegates behavior to OrderManager.
+/// Includes support for Stage 5 observer notifications.
+/// </summary>
 internal class OrderImplementation : IOrder
 {
-    // --- Fetch a single order by ID ---
-    public BO.Order Get(int id)
-    {
-        return OrderManager.Get(id); // wraps the helper
-    }
+    /// <summary>
+    /// Returns order by ID.
+    /// </summary>
+    public BO.Order Get(int id) => OrderManager.Get(id);
 
-    // --- Create a new order ---
-    public void Create(BO.Order order)
-    {
-        OrderManager.Create(order); // implement Create in OrderManager
-    }
+    /// <summary>
+    /// Creates a new order.
+    /// </summary>
+    public void Create(BO.Order order) => OrderManager.Create(order);
 
-    // --- Update existing order ---
-    public void Update(BO.Order order)
-    {
-        OrderManager.Update(order); // implement Update in OrderManager
-    }
+    /// <summary>
+    /// Updates an existing order.
+    /// </summary>
+    public void Update(BO.Order order) => OrderManager.Update(order);
 
-    // --- Delete a single order ---
-    public void Delete(int id)
-    {
-        OrderManager.Delete(id); // implement Delete in OrderManager
-    }
+    public void Delete(int id) => OrderManager.Delete(id);
 
-    // --- Delete all orders ---
-    public void DeleteAll()
-    {
-        OrderManager.DeleteAll(); // implement DeleteAll in OrderManager
-    }
+    public void DeleteAll() => OrderManager.DeleteAll();
 
-    // --- Get all orders ---
     public IEnumerable<BO.Order> ReadAll(Func<BO.Order, bool>? filter = null)
-    {
-        return OrderManager.ReadAll(filter);
-    }
+        => OrderManager.ReadAll(filter);
 
-
-    // --- Read with filter (single order) ---
     public BO.Order Read(Func<BO.Order, bool> filter)
-    {
-        return OrderManager.Read(filter);
-    }
+        => OrderManager.Read(filter);
 
-    // --- Optional: summary list of orders ---
     public IEnumerable<BO.OrderInList> GetAll()
-    {
-        return OrderManager.GetAll(); // implement GetAll in OrderManager
-    }
+        => OrderManager.GetAll();
 
-   //region Stage 5 - Observer
+    // ===== Stage 5 Observer Support =====
+
     public void AddObserver(Action listObserver) =>
         OrderManager.Observers.AddListObserver(listObserver);
 
@@ -65,14 +50,4 @@ internal class OrderImplementation : IOrder
 
     public void RemoveObserver(int id, Action observer) =>
         OrderManager.Observers.RemoveObserver(id, observer);
-
-    Order IOrder.Create(Order order)
-    {
-        throw new NotImplementedException();
-    }
-
-    Order IOrder.Update(Order order)
-    {
-        throw new NotImplementedException();
-    }
 }

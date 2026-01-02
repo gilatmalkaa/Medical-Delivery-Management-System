@@ -15,8 +15,10 @@ using System.Windows.Shapes;
 namespace PL.Admin
 {
     /// <summary>
-    /// Interaction logic for ConfigWindow.xaml
+    /// Window for viewing and editing system configuration values.
+    /// Currently serves as a UI container.
     /// </summary>
+
     public partial class ConfigWindow : Window
     {
         public ConfigWindow()

@@ -10,7 +10,13 @@ using System.Windows.Input;
 namespace PL.Admin
 {
     /// <summary>
-    /// Interaction logic for AdminWindow.xaml
+    /// Administration control panel.
+    /// Provides:
+    /// - System clock manipulation
+    /// - Configuration management
+    /// - Database reset / initialize
+    /// - Navigation to management screens
+    /// Uses observer pattern to react to BL layer changes.
     /// </summary>
     public partial class AdminWindow : Window
     {

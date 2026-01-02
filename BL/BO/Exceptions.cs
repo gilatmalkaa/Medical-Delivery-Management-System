@@ -1,5 +1,8 @@
 ﻿namespace BO;
 
+/// <summary>
+/// Thrown when requested BL entity does not exist.
+/// </summary>
 [Serializable]
 public class BlDoesNotExistException : Exception
 {
@@ -8,6 +11,9 @@ public class BlDoesNotExistException : Exception
         : base(message, innerException) { }
 }
 
+/// <summary>
+/// Thrown when trying to create entity that already exists.
+/// </summary>
 [Serializable]
 public class BlAlreadyExistsException : Exception
 {
@@ -16,6 +22,9 @@ public class BlAlreadyExistsException : Exception
         : base(message, innerException) { }
 }
 
+/// <summary>
+/// Thrown when BL object contains null values where forbidden.
+/// </summary>
 [Serializable]
 public class BlNullPropertyException : Exception
 {

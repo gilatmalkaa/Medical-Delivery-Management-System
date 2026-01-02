@@ -3,10 +3,15 @@
 namespace BO;
 
 /// <summary>
-/// Configuration values exposed to the presentation layer.
+/// Represents global configurable business parameters.
+/// This object is shared between BL and PL layers
+/// to allow the administrator to control system behavior.
 /// </summary>
 public class Config
 {
+    /// <summary>
+    /// Logical system clock.
+    /// </summary>
     public DateTime Clock { get; set; }
 
     public int MaxRange { get; set; }

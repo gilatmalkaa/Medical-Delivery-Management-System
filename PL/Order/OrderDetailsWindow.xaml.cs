@@ -17,10 +17,12 @@ using System.Windows.Shapes;
 namespace PL.Order
 {
     /// <summary>
-    /// Interaction logic for OrderDetailsWindow.xaml
+    /// Displays and edits a single order.
+    /// Supports:
+    /// - Add mode
+    /// - Update mode
+    /// Uses observer pattern to refresh UI when BL updates the entity.
     /// </summary>
-    /// 
-
     public partial class OrderDetailsWindow : Window
     {
         public int Id { get; set; }

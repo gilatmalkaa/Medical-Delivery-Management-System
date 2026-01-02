@@ -2,6 +2,10 @@
 
 namespace BO;
 
+/// <summary>
+/// Represents a full business order entity including customer,
+/// timing, delivery and scheduling data.
+/// </summary>
 public class Order
 {
     public int Id { get; init; }

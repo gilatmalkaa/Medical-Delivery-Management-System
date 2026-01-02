@@ -2,6 +2,10 @@
 
 namespace BO;
 
+/// <summary>
+/// Represents an open order displayed in list.
+/// Includes scheduling and timing information.
+/// </summary>
 public class OpenOrderInList
 {
     public int? CourierId { get; init; }
@@ -15,6 +19,7 @@ public class OpenOrderInList
     public double? ActualDistance { get; init; }
 
     public TimeSpan? ActualTime { get; init; }
+
     public ScheduleStatus ScheduleStatus { get; init; }
 
     public TimeSpan RemainingTime { get; init; }

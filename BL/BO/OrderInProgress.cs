@@ -3,7 +3,8 @@
 namespace BO;
 
 /// <summary>
-/// הזמנה בטיפול שליח – תצוגה לוגית עבור מסך "הזמנה בטיפול שליח".
+/// Logical representation of an order currently handled by courier.
+/// Used in courier active-delivery UI screens.
 /// </summary>
 public class OrderInProgress
 {

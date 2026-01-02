@@ -18,7 +18,11 @@ namespace PL.Order
 {
 
     /// <summary>
-    /// Interaction logic for OrderListWindow.xaml
+    /// Displays all orders.
+    /// Supports:
+    /// - Filtering
+    /// - Observer auto refresh
+    /// - Navigation to details window.
     /// </summary>
     public partial class OrderListWindow : Window
     {

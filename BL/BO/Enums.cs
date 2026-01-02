@@ -1,49 +1,19 @@
 ﻿namespace BO;
 
-public enum CourierType
-{
-    Foot,
-    Bicycle,
-    Motorcycle,
-    Car
-}
-public enum DeliveryType
-{
-    Foot,
-    Bicycle,
-    Motorcycle,
-    Car
-}
+/// <summary>Courier vehicle type.</summary>
+public enum CourierType { Foot, Bicycle, Motorcycle, Car }
 
-public enum DeliveryStatus
-{
-    InProgress,
-    Delivered,
-    Failed,
-    Canceled
-}
+/// <summary>Delivery transportation type.</summary>
+public enum DeliveryType { Foot, Bicycle, Motorcycle, Car }
 
-public enum OrderType
-{
-    Regular,
-    Express,
-    Prime
-}
+/// <summary>Status of a delivery process.</summary>
+public enum DeliveryStatus { InProgress, Delivered, Failed, Canceled }
 
-public enum OrderStatus
-{
-    All,
-    Created,
-    Assigned,
-    InDelivery,
-    Delivered,
-    Failed
-}
+/// <summary>Order service level.</summary>
+public enum OrderType { Regular, Express, Prime }
 
-public enum ScheduleStatus
-{
-    OnTime,
-    SlightDelay,
-    Late,
-    Scheduled
-}
+/// <summary>Logical business order state.</summary>
+public enum OrderStatus { All, Created, Assigned, InDelivery, Delivered, Failed }
+
+/// <summary>Delivery schedule condition.</summary>
+public enum ScheduleStatus { OnTime, SlightDelay, Late, Scheduled }
