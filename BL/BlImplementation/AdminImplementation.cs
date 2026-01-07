@@ -59,7 +59,7 @@ internal class AdminImplementation : IAdmin
 
     #region Stage 5
 
-    /// <summary>
+   
     /// Registers observer for clock changes.
     /// </summary>
     public void AddClockObserver(Action clockObserver) =>
