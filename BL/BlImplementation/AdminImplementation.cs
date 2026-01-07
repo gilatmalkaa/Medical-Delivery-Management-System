@@ -4,7 +4,7 @@ using BO;
 using Helpers;
 
 /// <summary>
-/// Implementation of IAdmin
+/// Implementation of IAdmin to Administer the system
 /// </summary>
 internal class AdminImplementation : IAdmin
 {
