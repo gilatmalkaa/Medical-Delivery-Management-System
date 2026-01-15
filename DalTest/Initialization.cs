@@ -52,12 +52,13 @@ public static class Initialization
             Courier courier = new(
                 Id: 0,
                 FullName: $"Courier {i + 1}",
+                Password: $"pass{i + 1}",    
                 Phone: $"050-12{i}3456",
                 Email: $"courier{i + 1}@mail.com",
                 Signature: $"Sign{i + 1}",
                 IsActive: true,
                 MaxPersonalDeliveryDistance: 10 + i * 2,
-                Type: (DeliveryType)(i % Enum.GetValues(typeof(DeliveryType)).Length),
+                Type: (CourierType)(i % Enum.GetValues(typeof(CourierType)).Length),
                 StartWorkDate: DateTime.Now.AddDays(-i * 30)
             );
 
@@ -136,7 +137,7 @@ public static class Initialization
                 Id: 0,
                 OrderId: orders.ElementAt(i).Id,
                 CourierId: couriers.ElementAt(i).Id,
-                Type: couriers.ElementAt(i).Type,
+                Type: orders.ElementAt(i).Type,
                 StartDeliveryDate: DateTime.Now.AddDays(-i * 2),
                 ActualDistance: 5 + i * 0.8,
                 ExpectedDistance: 6 + i * 0.5,

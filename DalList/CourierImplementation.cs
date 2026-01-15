@@ -3,18 +3,19 @@ using DalApi;
 using DO;
 using System.Linq;
 
-
 /// <summary>
-/// Implements ICourier — manages Courier data in memory.
+/// Provides an in-memory implementation for managing courier data,
+/// including creation, retrieval, update, and deletion operations.
 /// </summary>
 internal class CourierImplementation : ICourier
 {
     /// <summary>
-    /// Adds a new courier. Generates a new ID if Id == 0.
-    /// Throws exception if courier with same ID exists.
+    /// Creates a new courier entity.
+    /// Generates a new identifier if the provided ID is zero,
+    /// and throws an exception if a courier with the same ID already exists.
     /// </summary>
     public void Create(Courier item)
-    {   
+    {
         if (item.Id == 0)
         {
             int newId = DataSource.Config.NextCourierId;
@@ -30,7 +31,8 @@ internal class CourierImplementation : ICourier
     }
 
     /// <summary>
-    /// Returns a courier by ID, or null if not found.
+    /// Retrieves a courier by its unique identifier.
+    /// Returns null if no matching courier is found.
     /// </summary>
     public Courier? Read(int id)
     {
@@ -38,15 +40,16 @@ internal class CourierImplementation : ICourier
     }
 
     /// <summary>
-    /// Returns a list of all couriers.
+    /// Retrieves all couriers, optionally filtered by a predicate.
     /// </summary>
-    public IEnumerable<Courier> ReadAll(Func<Courier, bool>? filter = null) //stage 2
-    => filter == null
+    public IEnumerable<Courier> ReadAll(Func<Courier, bool>? filter = null)
+        => filter == null
             ? DataSource.Couriers.Select(item => item)
             : DataSource.Couriers.Where(filter);
 
     /// <summary>
-    /// Updates an existing courier. Throws exception if not found.
+    /// Updates an existing courier.
+    /// Throws an exception if the courier does not exist.
     /// </summary>
     public void Update(Courier item)
     {
@@ -59,7 +62,8 @@ internal class CourierImplementation : ICourier
     }
 
     /// <summary>
-    /// Deletes a courier by ID. Throws exception if not found.
+    /// Deletes a courier by its unique identifier.
+    /// Throws an exception if the courier does not exist.
     /// </summary>
     public void Delete(int id)
     {
@@ -71,17 +75,18 @@ internal class CourierImplementation : ICourier
     }
 
     /// <summary>
-    /// Deletes all couriers.
+    /// Deletes all courier entities from the data source.
     /// </summary>
     public void DeleteAll()
     {
         DataSource.Couriers.Clear();
     }
 
+    /// <summary>
+    /// Retrieves a single courier that matches the specified predicate.
+    /// </summary>
     Courier? ICrud<Courier>.Read(Func<Courier, bool> filter)
     {
         return DataSource.Couriers.FirstOrDefault(filter);
     }
 }
-
-  

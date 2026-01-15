@@ -6,6 +6,18 @@
 /// </summary>
 internal static class Config
 {
+    internal static string AdminId
+    {
+        get => XMLTools.GetConfigStringVal(s_data_config_xml, "AdminId");
+        set => XMLTools.SetConfigStringVal(s_data_config_xml, "AdminId", value);
+    }
+
+    internal static string AdminPassword
+    {
+        get => XMLTools.GetConfigStringVal(s_data_config_xml, "AdminPassword");
+        set => XMLTools.SetConfigStringVal(s_data_config_xml, "AdminPassword", value);
+    }
+
     /// <summary>
     /// File name of the main configuration XML file.
     /// </summary>

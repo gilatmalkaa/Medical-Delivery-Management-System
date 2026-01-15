@@ -39,6 +39,8 @@ public interface IAdmin
     /// </summary>
     void ResetDB();
 
+    IDictionary<OrderStatus, int> GetOrdersCountByStatus();
+
     #region Stage 5  
 
     /// <summary>
@@ -61,5 +63,15 @@ public interface IAdmin
     /// </summary>
     void RemoveClockObserver(Action clockObserver);
 
-    #endregion 
+    #endregion
+
+    /// <summary>
+    /// Authenticates a user based on ID and password
+    /// and returns the corresponding system role.
+    /// </summary>
+    /// <param name="id">User identifier.</param>
+    /// <param name="password">User password.</param>
+    /// <returns>The role assigned to the authenticated user.</returns>
+    UserRole Login(string id, string password);
+
 }

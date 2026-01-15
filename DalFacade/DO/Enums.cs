@@ -1,50 +1,47 @@
 ﻿namespace DO
 {
     /// <summary>
-    /// Enumerates available order types based on delivery urgency.
+    /// Defines the different types of orders according to delivery urgency.
     /// </summary>
     public enum OrderType
     {
-        /// <summary>Standard non-urgent delivery.</summary>
         Regular,
-
-        /// <summary>Express (fast) delivery.</summary>
         Express,
-
-        /// <summary>Same-day delivery service.</summary>
         SameDay
     }
 
     /// <summary>
-    /// Enumerates available courier vehicle or delivery types.
+    /// Defines the available courier transportation methods.
     /// </summary>
-    public enum DeliveryType
+    public enum CourierType
     {
-        /// <summary>Delivery made on foot.</summary>
         Foot,
-
-        /// <summary>Delivery made using a bicycle.</summary>
         Bicycle,
-
-        /// <summary>Delivery made using a car or motor vehicle.</summary>
+        Motorcycle,
         Car
     }
 
     /// <summary>
-    /// Enumerates the possible statuses of a delivery process.
+    /// Defines the possible states of a delivery lifecycle.
     /// </summary>
     public enum DeliveryStatus
     {
-        /// <summary>Delivery is scheduled but not yet started.</summary>
         Pending,
-
-        /// <summary>Delivery is currently in progress.</summary>
         InProgress,
-
-        /// <summary>Delivery has been completed successfully.</summary>
         Delivered,
-
-        /// <summary>Delivery was canceled or failed.</summary>
         Canceled
+    }
+
+    /// <summary>
+    /// Defines the possible states of an order throughout its lifecycle.
+    /// </summary>
+    public enum OrderStatus
+    {
+        All,
+        Created,
+        Assigned,
+        InDelivery,
+        Delivered,
+        Failed
     }
 }

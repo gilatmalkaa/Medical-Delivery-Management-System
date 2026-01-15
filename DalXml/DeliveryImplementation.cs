@@ -100,4 +100,6 @@ internal class DeliveryImplementation : IDelivery
     {
         XMLTools.SaveListToXMLSerializer(new List<Delivery>(), Config.s_deliveries_xml);
     }
+
+
 }

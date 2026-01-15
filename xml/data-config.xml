@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config>
+  <!-- ===== Admin credentials ===== -->
+  <AdminId>123456789</AdminId>
+  <AdminPassword>admin123</AdminPassword>
+  <!-- ===== System time ===== -->
+  <Clock>12/01/2026 20:28:13</Clock>
+  <!-- ===== Delivery constraints ===== -->
+  <MaxRange>30</MaxRange>
+  <SampleExpirationMinutes>90</SampleExpirationMinutes>
+  <MaxDeliveryDurationMinutes>180</MaxDeliveryDurationMinutes>
+  <!-- ===== Courier speeds (km/h) ===== -->
+  <FootSpeed>4.5</FootSpeed>
+  <BikeSpeed>15.0</BikeSpeed>
+  <MotorcycleSpeed>35.0</MotorcycleSpeed>
+  <CarSpeed>50.0</CarSpeed>
+  <!-- ===== Pricing ===== -->
+  <BaseDeliveryPrice>25.0</BaseDeliveryPrice>
+  <PricePerKm>3.2</PricePerKm>
+</config>

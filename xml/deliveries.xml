@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfDelivery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Delivery>
+    <Id>1</Id>
+    <OrderId>1002</OrderId>
+    <CourierId>213452626</CourierId>
+    <Type>Express</Type>
+    <StartDeliveryDate>2026-01-11T12:00:00</StartDeliveryDate>
+    <ActualDistance>7.4</ActualDistance>
+    <ExpectedDistance>6.8</ExpectedDistance>
+    <CompletionStatus>Delivered</CompletionStatus>
+    <EndDeliveryDate>2026-01-14T21:44:49.1981395+02:00</EndDeliveryDate>
+  </Delivery>
+  <Delivery>
+    <Id>2</Id>
+    <OrderId>1003</OrderId>
+    <CourierId>213452626</CourierId>
+    <Type>SameDay</Type>
+    <StartDeliveryDate>2026-01-12T09:10:00</StartDeliveryDate>
+    <ActualDistance>12.3</ActualDistance>
+    <ExpectedDistance>11.5</ExpectedDistance>
+    <CompletionStatus>Delivered</CompletionStatus>
+    <EndDeliveryDate>2026-01-12T13:45:00</EndDeliveryDate>
+  </Delivery>
+  <Delivery>
+    <Id>3</Id>
+    <OrderId>1001</OrderId>
+    <CourierId>0</CourierId>
+    <Type>Express</Type>
+    <StartDeliveryDate>2026-01-14T19:59:25.6281043+02:00</StartDeliveryDate>
+    <ActualDistance>0</ActualDistance>
+    <ExpectedDistance>0</ExpectedDistance>
+    <CompletionStatus>Canceled</CompletionStatus>
+    <EndDeliveryDate>2026-01-14T19:59:25.6281065+02:00</EndDeliveryDate>
+  </Delivery>
+  <Delivery>
+    <Id>0</Id>
+    <OrderId>1001</OrderId>
+    <CourierId>213452626</CourierId>
+    <Type>Regular</Type>
+    <StartDeliveryDate>2026-01-14T21:45:51.8993876+02:00</StartDeliveryDate>
+    <ActualDistance>0</ActualDistance>
+    <ExpectedDistance xsi:nil="true" />
+    <CompletionStatus>InProgress</CompletionStatus>
+    <EndDeliveryDate xsi:nil="true" />
+  </Delivery>
+  <Delivery>
+    <Id>4</Id>
+    <OrderId>1003</OrderId>
+    <CourierId>3</CourierId>
+    <Type>Express</Type>
+    <StartDeliveryDate>2026-01-15T00:19:35.5337675+02:00</StartDeliveryDate>
+    <ActualDistance>0</ActualDistance>
+    <ExpectedDistance xsi:nil="true" />
+    <CompletionStatus>InProgress</CompletionStatus>
+    <EndDeliveryDate xsi:nil="true" />
+  </Delivery>
+  <Delivery>
+    <Id>5</Id>
+    <OrderId>1005</OrderId>
+    <CourierId>5</CourierId>
+    <Type>Express</Type>
+    <StartDeliveryDate>2026-01-15T01:02:00.5413833+02:00</StartDeliveryDate>
+    <ActualDistance>0</ActualDistance>
+    <ExpectedDistance xsi:nil="true" />
+    <CompletionStatus>Delivered</CompletionStatus>
+    <EndDeliveryDate>2026-01-15T01:05:22.0848744+02:00</EndDeliveryDate>
+  </Delivery>
+</ArrayOfDelivery>

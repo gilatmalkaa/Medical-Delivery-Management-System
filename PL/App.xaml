@@ -3,12 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:PL">
     <Application.Resources>
+        <!-- ===== ENUM COLLECTIONS ===== -->
         <local:OrderStatusCollection x:Key="OrderStatusCollectionKey"/>
         <local:DeliveryStatusCollection x:Key="DeliveryStatusCollectionKey"/>
         <local:CourierTypeCollection x:Key="CourierTypeCollectionKey"/>
         <local:DeliveryTypeCollection x:Key="DeliveryTypeCollectionKey"/>
         <local:ScheduleStatusCollection x:Key="ScheduleStatusCollectionKey"/>
+
+        <!-- ===== UI HELPERS ===== -->
         <local:ConvertUpdateToTrue x:Key="ConvertUpdateToTrueKey"/>
         <local:ConvertUpdateToVisible x:Key="ConvertUpdateToVisibleKey"/>
+
+        <!-- ===== VISIBILITY CONVERTERS ===== -->
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <local:NullToVisibilityConverter x:Key="NullToVisibility"/>
+        <local:NotNullToVisibilityConverter x:Key="NotNullToVisibility"/>
+        <local:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+        <local:IdToVisibilityConverter x:Key="IdToVisibilityConverter"/>
+
+        <!-- ===== READ / ENABLE CONVERTERS ===== -->
+        <local:IdToReadOnlyConverter x:Key="IdToReadOnlyConverter"/>
+        <local:OrderOpenOnlyConverter x:Key="OrderOpenOnlyConverter"/>
+
+        <!-- ===== ✅ MISSING BOOL CONVERTERS (CRITICAL) ===== -->
+        <local:NullToBoolConverter x:Key="NullToBool"/>
+        <local:NotNullToBoolConverter x:Key="NotNullToBool"/>
+
+
+
+
     </Application.Resources>
 </Application>

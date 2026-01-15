@@ -24,12 +24,13 @@ public record Order(
     string CustomerName = "",
     string CustomerPhone = "",
     double Weight = 0,
-    DateTime? OpenDate = null
+    DateTime? OpenDate = null,
+    OrderStatus Status = OrderStatus.Created
 )
 {
     /// <summary>
     /// Default constructor initializing an empty order
     /// with default values for all fields.
     /// </summary>
-    public Order() : this(0, default, "", "", 0, 0, "", "", 0, default) { }
+    public Order() : this(0, default, "", "", 0, 0, "", "", 0, default, OrderStatus.Created) { }
 }

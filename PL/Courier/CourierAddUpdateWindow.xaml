@@ -1,15 +1,295 @@
 ﻿<Window x:Class="PL.Courier.CourierAddUpdateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PL.Courier"
-        mc:Ignorable="d"
-        Title="CourierAddUpdateWindow" Height="450" Width="800">
+        Title="Courier Details"
+        Height="820"
+        Width="560"
+        WindowStartupLocation="CenterScreen"
+        Background="#F2F3F5">
+
+    <Window.Resources>
+
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#111827"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="Margin" Value="0,8,0,4"/>
+        </Style>
+
+        <Style x:Key="InputBox" TargetType="TextBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+
+        <Style x:Key="ReadOnlyBox" TargetType="TextBox">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#F9FAFB"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+    </Window.Resources>
+
     <Grid>
-        <ComboBox
-        ItemsSource="{Binding Source={StaticResource CourierTypeCollectionKey}}"
-        SelectedItem="{Binding Type}"/>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== CONTENT ===== -->
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="24">
+
+                <TextBlock Text="Courier Details"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#111827"
+                           Margin="0,0,0,24"/>
+
+                <!-- ===== COURIER SUMMARY ===== -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Courier Summary" Style="{StaticResource SectionTitle}"/>
+
+                        <TextBlock Text="Courier ID" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Height="36"
+         Padding="10,6"
+         FontSize="13"
+         BorderBrush="#D1D5DB"
+         BorderThickness="1"
+         Background="White"
+         Text="{Binding CurrentCourier.Id, Mode=TwoWay}"
+         IsReadOnly="{Binding CurrentCourier.Id,
+                              Converter={StaticResource IdToReadOnlyConverter}}"/>
+
+                        <TextBlock Text="Start Work Date" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.StartWorkDate,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Delivered On Time" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.DeliveredOnTimeCount,
+                                                TargetNullValue=0,
+                                                FallbackValue=0}"/>
+
+                        <TextBlock Text="Delivered Late" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.DeliveredLateCount,
+                                                TargetNullValue=0,
+                                                FallbackValue=0}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ===== EDITABLE DETAILS ===== -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Courier Details" Style="{StaticResource SectionTitle}"/>
+
+                        <TextBlock Text="Full Name" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource InputBox}"
+                                 Text="{Binding CurrentCourier.Name, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"/>
+
+                        <TextBlock Text="Phone" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource InputBox}"
+                                 Text="{Binding CurrentCourier.Phone, FallbackValue=''}"/>
+
+                        <TextBlock Text="Email" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource InputBox}"
+                                 Text="{Binding CurrentCourier.Email, FallbackValue=''}"/>
+                        <CheckBox
+    Content="Active"
+    IsChecked="{Binding CurrentCourier.IsActive, Mode=TwoWay}"
+    IsEnabled="{Binding IsAdmin}" />
+
+
+                        <TextBlock Text="Max Distance (km)" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource InputBox}"
+                                 Text="{Binding CurrentCourier.MaxPersonalDeliveryDistance,
+                                                TargetNullValue=0,
+                                                FallbackValue=0}"/>
+
+                        <ComboBox x:Name="CourierTypeCombo"
+          Height="36"
+          FontSize="13"
+          SelectedItem="{Binding CurrentCourier.Type, Mode=TwoWay}"
+          IsEnabled="{Binding CanEditCourierType}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ===== ORDER IN PROGRESS ===== -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Order In Progress" Style="{StaticResource SectionTitle}"/>
+
+                        <TextBlock Text="Order ID" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.OrderId,
+                                                TargetNullValue=0,
+                                                FallbackValue=0}"/>
+
+                        <TextBlock Text="Order Type" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.Type,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Description" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+         Text="{Binding CurrentCourier.CurrentOrder.Description,
+                        TargetNullValue=-,
+                        FallbackValue=-}"
+         TextDecorations="Strikethrough"/>
+
+                        <TextBlock Text="Address" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+         Text="{Binding CurrentCourier.CurrentOrder.Address,
+                        TargetNullValue=-,
+                        FallbackValue=-}"
+         TextDecorations="Strikethrough"/>
+
+                        <TextBlock Text="Air Distance (km)" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.AirDistance,
+                                                TargetNullValue=0,
+                                                FallbackValue=0}"/>
+
+                        <TextBlock Text="Actual Distance (km)" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.ActualDistance,
+                                                TargetNullValue=0,
+                                                FallbackValue=0}"/>
+
+                        <TextBlock Text="Customer Name" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+         Text="{Binding CurrentCourier.CurrentOrder.CustomerName,
+                        TargetNullValue=-,
+                        FallbackValue=-}"
+         TextDecorations="Strikethrough"/>
+
+
+                        <TextBlock Text="Customer Phone" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+         Text="{Binding CurrentCourier.CurrentOrder.CustomerPhone,
+                        TargetNullValue=-,
+                        FallbackValue=-}"
+         TextDecorations="Strikethrough"/>
+                        
+                        <TextBlock Text="Order Open Date" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.OpenDate,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Delivery Start Date" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.StartDeliveryDate,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Expected Supply Time" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.ExpectedArrivalTime,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Latest Supply Time" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.LatestSupplyTime,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Order Status" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.OrderStatus,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Schedule Status" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.ScheduleStatus,
+                                                TargetNullValue='-',
+                                                FallbackValue='-'}"/>
+
+                        <TextBlock Text="Remaining Time" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding CurrentCourier.CurrentOrder.RemainingTimeToFinishOrder,
+                                                TargetNullValue='00:00:00',
+                                                FallbackValue='00:00:00'}"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== FIXED FOOTER ===== -->
+        <Border Grid.Row="1"
+        Background="#F2F3F5"
+        Padding="24"
+        BorderBrush="#E5E7EB"
+        BorderThickness="1,0,0,0">
+
+            <DockPanel LastChildFill="False">
+
+                <!-- DELETE -->
+                <Button Content="Delete Courier"
+                Height="42"
+                Width="180"
+                Background="#DC2626"
+                Foreground="White"
+                FontSize="14"
+                FontWeight="SemiBold"
+                BorderThickness="0"
+                Cursor="Hand"
+                DockPanel.Dock="Left"
+                Click="BtnDelete_Click"
+                Visibility="{Binding CurrentCourier.Id,
+                                     Converter={StaticResource IdToVisibilityConverter}}"/>
+
+                <!-- ADD / UPDATE -->
+                <Button Content="{Binding ButtonText}"
+                Style="{StaticResource PrimaryButton}"
+                DockPanel.Dock="Right"
+                Click="BtnSave_Click"/>
+
+            </DockPanel>
+        </Border>
+
     </Grid>
 </Window>

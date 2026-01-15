@@ -259,12 +259,13 @@ namespace DalTest
             var courier = new Courier(
                 Id: 0,
                 FullName: "Test Courier",
+                Password: "1234",
                 Phone: "0501234567",
                 Email: "courier@test.com",
                 Signature: "Sig",
                 IsActive: true,
                 MaxPersonalDeliveryDistance: 15,
-                Type: DeliveryType.Foot,
+                Type: CourierType.Foot,
                 StartWorkDate: DateTime.Now
             );
 
@@ -402,7 +403,7 @@ namespace DalTest
                 Id: 0,
                 OrderId: orderId,
                 CourierId: courierId,
-                Type: DeliveryType.Foot,
+                Type: OrderType.Express,
                 StartDeliveryDate: DateTime.Now,
                 ActualDistance: 5.0,
                 ExpectedDistance: 6.0,

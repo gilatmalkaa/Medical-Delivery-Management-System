@@ -1,58 +1,88 @@
 ﻿<Window x:Class="PL.Delivery.DeliveryListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="Delivery List"
+        Title="Deliveries List"
         Height="640"
-        Width="800"
+        Width="900"
+        Background="#F5F6FA"
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
 
-    <!-- External Grid: main screen layout -->
-    <Grid>
+    <Grid Margin="10">
 
-        <!-- Main rows: header / list / footer -->
         <Grid.RowDefinitions>
-            <!-- Header row -->
-            <RowDefinition Height="40"/>
-
-            <!-- List row -->
-            <RowDefinition Height="500"/>
-
-            <!-- Footer row -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Internal Grid: header area -->
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
 
-            <!-- Screen title -->
-            <Label Content="Deliveries List"
-                   Grid.Column="0"
-                   VerticalAlignment="Center"/>
+        <!--  HEADER BAR -->
+        <DockPanel Grid.Row="0" Margin="0 0 0 10">
 
-            <!-- Sorting options -->
-            <ComboBox Grid.Column="1"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Center"/>
-        </Grid>
+            <TextBlock Text="Deliveries Management"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="#333"
+                       DockPanel.Dock="Left"/>
 
-        <!-- Deliveries list -->
-        <ListView Grid.Row="1"
-          ItemsSource="{Binding Path=DeliveryList}" />
-        
-        <!-- Add Delivery button -->
-        <Button Grid.Row="2"
-                Content="Add Delivery"
-                HorizontalAlignment="Right"
-                Margin="10"/>
-        
+            <ComboBox SelectedValue="{Binding SelectedStatus}"
+                      ItemsSource="{Binding Source={StaticResource DeliveryStatusCollectionKey}}"
+                      SelectionChanged="StatusFilter_SelectionChanged"
+                      Width="150"
+                      Margin="10 0 0 0"
+                      DockPanel.Dock="Right"/>
+        </DockPanel>
 
+
+        <!--  DATA GRID -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding DeliveryList}"
+                  SelectedItem="{Binding SelectedDelivery}"
+                  MouseDoubleClick="List_MouseDoubleClick"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  RowHeaderWidth="0"
+                  Background="#FAFAFA"
+                  AlternatingRowBackground="#F1F1F1"
+                  BorderBrush="#B5B5B5"
+                  BorderThickness="1">
+
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="ID"
+                                    Binding="{Binding DeliveryId}"
+                                    Width="90"/>
+
+                <DataGridTextColumn Header="Courier"
+                                    Binding="{Binding CourierName}"
+                                    Width="200"/>
+
+                <DataGridTextColumn Header="Type"
+                                    Binding="{Binding Type}"
+                                    Width="120"/>
+
+                <DataGridTextColumn Header="Status"
+                                    Binding="{Binding CompletionStatus}"
+                                    Width="130"/>
+
+                <DataGridTextColumn Header="Start"
+                                    Binding="{Binding StartDeliveryDate}"
+                                    Width="160"/>
+
+                <DataGridTextColumn Header="End"
+                                    Binding="{Binding EndDeliveryDate}"
+                                    Width="160"/>
+
+            </DataGrid.Columns>
+        </DataGrid>
+
+
+        <!-- FOOTER BUTTON -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0 10 0 0">
+        </StackPanel>
 
     </Grid>
 </Window>

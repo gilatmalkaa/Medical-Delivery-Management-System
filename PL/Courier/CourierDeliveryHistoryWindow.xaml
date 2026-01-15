@@ -1,0 +1,114 @@
+﻿<Window x:Class="PL.Courier.CourierDeliveryHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Delivery History"
+        Height="550"
+        Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="White">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Text="Courier Delivery History"
+                   FontSize="22"
+                   FontWeight="Bold"
+                   Margin="0,0,0,15"/>
+
+        <!-- TABLE CONTAINER -->
+        <Border Grid.Row="1"
+                BorderBrush="#E5E7EB"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="0">
+
+            <DataGrid ItemsSource="{Binding ClosedDeliveries}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      GridLinesVisibility="None"
+                      HeadersVisibility="Column"
+                      Background="White"
+                      BorderThickness="0"
+                      RowHeight="32"
+                      ColumnHeaderHeight="34"
+                      FontSize="13"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+
+                <!-- Header style -->
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="Foreground" Value="#1F2937"/>
+                        <Setter Property="Background" Value="#F9FAFB"/>
+                        <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="Padding" Value="12,6"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <!-- Cell style -->
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Foreground" Value="#111827"/>
+                    </Style>
+                </DataGrid.CellStyle>
+
+                <!-- Zebra rows -->
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="White"/>
+                        <Style.Triggers>
+                            <Trigger Property="AlternationIndex" Value="1">
+                                <Setter Property="Background" Value="#FAFAFA"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+
+                    <DataGridTextColumn Header="Order ID"
+                                        Binding="{Binding OrderId}"
+                                        Width="90"/>
+
+                    <DataGridTextColumn Header="Order Type"
+                                        Binding="{Binding OrderType}"
+                                        Width="110"/>
+
+                    <DataGridTextColumn Header="Address"
+                                        Binding="{Binding Address}"
+                                        Width="3*"/>
+
+                    <DataGridTextColumn Header="Delivery Type"
+                                        Binding="{Binding Type}"
+                                        Width="130"/>
+
+                    <DataGridTextColumn Header="Actual Distance (km)"
+                                        Binding="{Binding ActualDistance, StringFormat={}{0:F1}}"
+                                        Width="170"/>
+
+                    <DataGridTextColumn Header="Treatment Time"
+                                        Binding="{Binding TreatmentTime, StringFormat={}{0:hh\\:mm\\:ss}}"
+                                        Width="150"/>
+
+                    <DataGridTextColumn Header="Delivery Status"
+                                        Binding="{Binding CompletionStatus}"
+                                        Width="150"/>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Window>

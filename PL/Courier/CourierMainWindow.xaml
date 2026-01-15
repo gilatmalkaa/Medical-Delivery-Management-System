@@ -1,0 +1,288 @@
+﻿<Window x:Class="PL.Courier.CourierMainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Courier Workspace"
+        Height="650"
+        Width="900"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F6FA"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+
+    <!-- ===== Resources ===== -->
+    <Window.Resources>
+
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="Margin" Value="0,8,0,4"/>
+        </Style>
+
+        <Style x:Key="Value" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#111827"/>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="140"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ===== HEADER ===== -->
+            <TextBlock Text="Courier Workspace"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Margin="0,0,0,20"/>
+
+            <!-- ===== COURIER DETAILS ===== -->
+            <Border Grid.Row="1" Style="{StaticResource Card}">
+                <StackPanel>
+
+                    <TextBlock Text="Courier Details"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,12"/>
+
+                    <!-- FIXED GRID -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- LEFT COLUMN -->
+                        <StackPanel Grid.Column="0">
+
+                            <TextBlock Style="{StaticResource Label}" Text="Courier ID"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.Id}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Name"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.Name}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Phone"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.Phone}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Email"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.Email}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Signature"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.Signature}"/>
+
+                        </StackPanel>
+
+                        <!-- RIGHT COLUMN -->
+                        <StackPanel Grid.Column="1">
+
+                            <TextBlock Style="{StaticResource Label}" Text="Courier Type"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.Type}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Active"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.IsActive}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Available"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.IsAvailable}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Start Work Date"/>
+                            <TextBlock Style="{StaticResource Value}"
+                                       Text="{Binding Courier.StartWorkDate,
+                                              StringFormat={}{0:dd/MM/yyyy}}"/>
+
+                            <TextBlock Style="{StaticResource Label}" Text="Max Delivery Distance (km)"/>
+                            <TextBlock Style="{StaticResource Value}"
+                                       Text="{Binding Courier.MaxPersonalDeliveryDistance}"/>
+
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- ===== STATISTICS ===== -->
+                    <Separator Margin="0,16,0,12"/>
+
+                    <TextBlock Text="Delivery Statistics"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Label}" Text="Total Deliveries"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.TotalDeliveries}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Style="{StaticResource Label}" Text="Delivered On Time"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.DeliveredOnTimeCount}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource Label}" Text="Delivered Late"/>
+                            <TextBlock Style="{StaticResource Value}" Text="{Binding Courier.DeliveredLateCount}"/>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+            </Border>
+
+
+            <Border Grid.Row="2" Style="{StaticResource Card}">
+                <Grid>
+
+                    <!-- אין הזמנה בטיפול -->
+                    <TextBlock Text="No active order"
+                   FontStyle="Italic"
+                   Foreground="Gray"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Visibility="{Binding Courier.CurrentOrder,
+                                        Converter={StaticResource NullToVisibility}}"/>
+
+                    <StackPanel Visibility="{Binding Courier.CurrentOrder,
+                         Converter={StaticResource NotNullToVisibility}}">
+
+                        <TextBlock Text="Order In Progress"
+               FontSize="16"
+               FontWeight="SemiBold"
+               Margin="0,0,0,12"/>
+
+
+                        <TextBlock Style="{StaticResource Label}" Text="Order ID"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.OrderId}"/>
+
+                        <!-- Order details -->
+                        <TextBlock Style="{StaticResource Label}" Text="Order Type"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.Type}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Description"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.Description}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Address"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.Address}"/>
+
+                        <!-- Customer -->
+                        <TextBlock Style="{StaticResource Label}" Text="Customer Name"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.CustomerName}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Customer Phone"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.CustomerPhone}"/>
+
+                        <!-- Distances -->
+                        <TextBlock Style="{StaticResource Label}" Text="Air Distance (km)"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.AirDistance}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Actual Distance (km)"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.ActualDistance}"/>
+
+                        <!-- Dates -->
+                        <TextBlock Style="{StaticResource Label}" Text="Order Open Date"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.OpenDate,
+                              StringFormat={}{0:dd/MM/yyyy HH:mm}}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Delivery Start Date"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.StartDeliveryDate,
+                              StringFormat={}{0:dd/MM/yyyy HH:mm}}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Expected Arrival Time"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.ExpectedArrivalTime,
+                              StringFormat={}{0:dd/MM/yyyy HH:mm}}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Latest Supply Time"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.LatestSupplyTime,
+                              StringFormat={}{0:dd/MM/yyyy HH:mm}}"/>
+
+                        <!-- Status -->
+                        <TextBlock Style="{StaticResource Label}" Text="Order Status"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.OrderStatus}"/>
+
+                        <TextBlock Style="{StaticResource Label}" Text="Schedule Status"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.ScheduleStatus}"/>
+
+                        <!-- Remaining time -->
+                        <TextBlock Style="{StaticResource Label}" Text="Remaining Time"/>
+                        <TextBlock Style="{StaticResource Value}"
+               Text="{Binding Courier.CurrentOrder.RemainingTimeToFinishOrder}"/>
+
+
+                        <Button Content="Finish Delivery"
+        Margin="0,16,0,0"
+        Height="44"
+        Background="#F97316"
+        Foreground="White"
+        FontSize="15"
+        FontWeight="SemiBold"
+        BorderThickness="0"
+        Cursor="Hand"
+        IsEnabled="{Binding CanFinishDelivery}"
+        Click="BtnFinishDelivery_Click"/>
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+
+            <!-- ===== ACTION BUTTONS ===== -->
+            <StackPanel Grid.Row="3"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,10,0,0">
+
+                <Button Content="Update Courier Details"
+                        Style="{StaticResource PrimaryButton}"
+                        Click="BtnUpdateCourierDetails_Click"/>
+
+                <Button Content="Delivery History"
+                        Style="{StaticResource PrimaryButton}"
+                        Click="BtnDeliveryHistory_Click"/>
+
+                <Button Content="Choose Order"
+        Style="{StaticResource PrimaryButton}"
+        Click="BtnChooseOrder_Click"/>
+
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
+</Window>

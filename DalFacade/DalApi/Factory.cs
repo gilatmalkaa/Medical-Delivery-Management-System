@@ -1,19 +1,15 @@
 ﻿namespace DalApi;
 
 /// <summary>
-/// Factory responsible for dynamically loading the DAL implementation
-/// according to dal-config.xml.
-/// Supports plugin-based architecture and singleton DAL instance.
+/// Provides a factory for dynamically creating and retrieving
+/// the configured DAL singleton instance based on XML configuration.
 /// </summary>
 public static class Factory
 {
     /// <summary>
-    /// Returns the configured DAL instance.
-    /// Loads assembly at runtime and extracts singleton implementation.
+    /// Retrieves the active DAL implementation by loading the configured
+    /// assembly at runtime and returning its singleton instance.
     /// </summary>
-    /// <exception cref="DalConfigException">
-    /// Thrown when configuration is missing, invalid or implementation cannot be loaded.
-    /// </exception>
     public static IDal Get
     {
         get
@@ -37,10 +33,12 @@ public static class Factory
             }
 
             Type type = Type.GetType($"{dal.Namespace}.{dal.Class}, {dal.Package}") ??
-                throw new DalConfigException($"Class {dal.Namespace}.{dal.Class} was not found in {dal.Package}.dll");
+                throw new DalConfigException(
+                    $"Class {dal.Namespace}.{dal.Class} was not found in {dal.Package}.dll");
 
             return type
-                .GetProperty("Instance",
+                .GetProperty(
+                    "Instance",
                     System.Reflection.BindingFlags.Public |
                     System.Reflection.BindingFlags.Static)?
                 .GetValue(null) as IDal

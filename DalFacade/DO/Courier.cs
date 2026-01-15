@@ -17,11 +17,12 @@
 public record Courier(
     int Id,
     string FullName,
+    string Password,
     string Phone,
     string Email,
     string Signature,
     double MaxPersonalDeliveryDistance,
-    DeliveryType Type = DeliveryType.Foot,
+    CourierType Type = CourierType.Foot,
     bool IsActive = true,
     DateTime? StartWorkDate = default
 )
@@ -30,5 +31,6 @@ public record Courier(
     /// Default constructor for initializing an empty courier object
     /// with default values for all properties.
     /// </summary>
-    public Courier() : this(0, "", "", "", "", 0, DeliveryType.Foot, true, default) { }
+    public Courier()
+    : this(0, "", "", "", "", "", 0, CourierType.Foot, true, default) { }
 }

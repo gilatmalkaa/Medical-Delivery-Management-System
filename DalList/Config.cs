@@ -7,6 +7,8 @@
 /// </summary>
 internal static class Config
 {
+    public static string AdminId { get; set; } = string.Empty;
+    public static string AdminPassword { get; set; } = string.Empty;
     /// <summary>
     /// Starting ID number for orders.
     /// </summary>

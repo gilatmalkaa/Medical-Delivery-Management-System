@@ -1,65 +1,166 @@
 ﻿<Window x:Class="PL.Courier.CourierListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="Courier List"
-        Height="640"
-        Width="800"
-        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}">
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="Couriers Management"
+        Height="650"
+        Width="920"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F6FA"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
 
-    <!-- External Grid: main screen layout -->
-    <Grid>
+    <!-- ===== RESOURCES ===== -->
+    <Window.Resources>
 
-        <!-- Main rows: header / list / footer -->
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="500"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
-        <!-- Internal Grid: header area -->
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- Card -->
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
 
-            <!-- Screen title -->
-            <Label Content="Couriers List"
-                   Grid.Column="0"
-                   VerticalAlignment="Center"/>
+        <!-- Primary Button -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#2563EB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
 
-            <!-- Sorting options -->
-            <ComboBox Grid.Column="1"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Center"/>
-        </Grid>
+        <!-- Danger Button -->
+        <Style x:Key="DangerButton" TargetType="Button"
+               BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#DC2626"/>
+        </Style>
 
-        <ListView Grid.Row="1"
-          ItemsSource="{Binding Path=CourierList}" />
+    </Window.Resources>
 
-        <!-- Footer Row -->
-        <Grid Grid.Row="2"
-      Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+    <!-- ===== MAIN LAYOUT ===== -->
+    <Grid Margin="20">
 
-            <!-- ComboBox – Courier Type Filter -->
-            <ComboBox Grid.Column="0"
-              ItemsSource="{Binding Source={StaticResource CourierTypeCollectionKey}}"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Center"/>
+        <Border Style="{StaticResource Card}">
+            <Grid>
 
-            <!-- Add Courier Button -->
-            <Button Grid.Column="1"
-            Content="Add Courier"
-            Margin="10 0 0 0"
-            HorizontalAlignment="Right"/>
-        </Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
+                <!-- ===== HEADER ===== -->
+                <DockPanel Grid.Row="0" Margin="0 0 0 14">
+
+                    <TextBlock Text="Couriers Management"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="#1F2937"
+                               DockPanel.Dock="Left"/>
+
+                    <ComboBox Width="180"
+          DockPanel.Dock="Right"
+          SelectedItem="{Binding SelectedType}"
+          SelectionChanged="Filter_SelectionChanged">
+
+                        <ComboBox.ItemsSource>
+                            <CompositeCollection>
+                                <!-- ALL option -->
+                                <sys:String>All</sys:String>
+
+                                <!-- Existing courier types -->
+                                <CollectionContainer
+                Collection="{Binding Source={StaticResource CourierTypeCollectionKey}}"/>
+                            </CompositeCollection>
+                        </ComboBox.ItemsSource>
+                    </ComboBox>
+                </DockPanel>
+
+                <!-- ===== DATA GRID ===== -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding CourierList}"
+                          SelectedItem="{Binding SelectedCourier}"
+                          MouseDoubleClick="List_MouseDoubleClick"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          RowHeaderWidth="0"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="None"
+                          Background="White"
+                          AlternatingRowBackground="#F9FAFB"
+                          BorderThickness="0">
+
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="ID"
+                                            Binding="{Binding Id}"
+                                            Width="60"/>
+
+                        <DataGridTextColumn Header="Name"
+                                            Binding="{Binding FullName}"
+                                            Width="*"/>
+
+                        <DataGridTextColumn Header="Type"
+                                            Binding="{Binding Type}"
+                                            Width="120"/>
+
+                        <DataGridCheckBoxColumn Header="Active"
+                                                Binding="{Binding IsActive}"
+                                                Width="80"/>
+
+                        <DataGridTextColumn Header="Start Work Date"
+                        Width="150"
+                        Binding="{Binding StartWorkDate,
+                                  StringFormat={}{0:dd/MM/yyyy}}"/>
+
+                        <DataGridTextColumn Header="Total Deliveries"
+                    Binding="{Binding TotalDeliveries}"
+                    Width="120"/>
+
+                        <DataGridTextColumn Header="On Time"
+                                            Binding="{Binding TotalDeliveriesOnTime}"
+                                            Width="100"/>
+
+                        <DataGridTextColumn Header="Late"
+                                            Binding="{Binding TotalDeliveriesLate}"
+                                            Width="80"/>
+
+                        <DataGridTemplateColumn Header="Actions" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Delete"
+                                            Style="{StaticResource DangerButton}"
+                                            Padding="6,2"
+                                            Click="BtnDelete_Click"
+                                            Visibility="{Binding CanDelete,
+                                                Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- ===== FOOTER ===== -->
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0 14 0 0">
+
+                    <Button Content="➕ Add Courier"
+                            Width="150"
+                            Style="{StaticResource PrimaryButton}"
+                            Click="BtnAdd_Click"/>
+                </StackPanel>
+
+            </Grid>
+        </Border>
     </Grid>
 </Window>

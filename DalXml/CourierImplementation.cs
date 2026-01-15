@@ -14,16 +14,19 @@ internal class CourierImplementation : ICourier
     /// Throws <see cref="DalAlreadyExistsException"/> if a courier with the same ID already exists.
     /// </summary>
     /// <param name="item">The courier to add.</param>
-    public void Create(Courier item)
-    {
-        List<Courier> list = XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
+   public void Create(Courier item)
+{
+    List<Courier> list =
+        XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
 
-        if (list.Any(c => c.Id == item.Id))
-            throw new DalAlreadyExistsException($"Courier with ID={item.Id} already exists");
+    if (list.Any(c => c.Id == item.Id))
+        throw new DalAlreadyExistsException(
+            $"Courier with ID={item.Id} already exists");
 
-        list.Add(item);
-        XMLTools.SaveListToXMLSerializer(list, Config.s_couriers_xml);
-    }
+    list.Add(item);
+
+    XMLTools.SaveListToXMLSerializer(list, Config.s_couriers_xml);
+}
 
     /// <summary>
     /// Reads a courier by its unique ID.

@@ -1,47 +1,55 @@
-﻿using System.Runtime.CompilerServices;
+﻿using BO;
+using System.Runtime.CompilerServices;
 
 namespace Helpers;
 
 /// <summary>
-/// Internal BL manager for all Application's Configuration Variables and Clock logic policies
+/// Internal business logic manager responsible for
+/// system configuration, logical clock handling,
+/// authentication, and administrative operations.
 /// </summary>
-internal static class AdminManager //stage 4
+internal static class AdminManager
 {
-    #region Stage 4-7
-    private static readonly DalApi.IDal s_dal = DalApi.Factory.Get; //stage 4
+    private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
     /// <summary>
-    /// Property for providing current application's clock value for any BL class that may need it
+    /// Gets the current logical system clock.
     /// </summary>
-    internal static DateTime Now { get => s_dal.Config.Clock; } //stage 4
-
-    internal static event Action? ConfigUpdatedObservers; //stage 5
-    internal static event Action? ClockUpdatedObservers;  //stage 5
-
-    private static Task? _periodicTask = null; //stage 7
+    internal static DateTime Now => s_dal.Config.Clock;
 
     /// <summary>
-    /// Method to update application's clock from any BL class as may be required
+    /// Event raised when configuration values are updated.
     /// </summary>
-    internal static void UpdateClock(DateTime newClock) //stage 4-7
+    internal static event Action? ConfigUpdatedObservers;
+
+    /// <summary>
+    /// Event raised when the system clock is updated.
+    /// </summary>
+    internal static event Action? ClockUpdatedObservers;
+
+    private static Task? _periodicTask = null;
+
+    /// <summary>
+    /// Updates the logical system clock
+    /// and notifies registered observers.
+    /// </summary>
+    /// <param name="newClock">New clock value.</param>
+    internal static void UpdateClock(DateTime newClock)
     {
-        var oldClock = s_dal.Config.Clock; //stage 4
-        s_dal.Config.Clock = newClock;     //stage 4
-
-        // TO_DO: stage 4
-        // No periodic logic yet for this project
-
-        //Calling all the observers of clock update
-        ClockUpdatedObservers?.Invoke(); //prepared for stage 5
+        s_dal.Config.Clock = newClock;
+        ClockUpdatedObservers?.Invoke();
     }
 
     /// <summary>
-    /// Method for providing current configuration variables values
+    /// Retrieves the current system configuration.
     /// </summary>
-    [MethodImpl(MethodImplOptions.Synchronized)] //stage 7
-    internal static BO.Config GetConfig() //stage 4
-        => new BO.Config()
+    /// <returns>Configuration snapshot.</returns>
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    internal static Config GetConfig()
+        => new Config
         {
+            AdminId = s_dal.Config.AdminId,
+            AdminPassword = s_dal.Config.AdminPassword,
             Clock = s_dal.Config.Clock,
             MaxRange = s_dal.Config.MaxRange,
             SampleExpirationMinutes = s_dal.Config.SampleExpirationMinutes,
@@ -55,99 +63,162 @@ internal static class AdminManager //stage 4
         };
 
     /// <summary>
-    /// Method for setting current configuration variables values
+    /// Updates system configuration values
+    /// and notifies observers if changes occurred.
     /// </summary>
-    [MethodImpl(MethodImplOptions.Synchronized)] //stage 7
-    internal static void SetConfig(BO.Config configuration) //stage 4
+    /// <param name="configuration">Updated configuration.</param>
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    internal static void SetConfig(Config configuration)
     {
-        bool configChanged = false; // stage 5
+        bool changed = false;
 
         if (s_dal.Config.Clock != configuration.Clock)
         {
             s_dal.Config.Clock = configuration.Clock;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.MaxRange != configuration.MaxRange)
         {
             s_dal.Config.MaxRange = configuration.MaxRange;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.SampleExpirationMinutes != configuration.SampleExpirationMinutes)
         {
             s_dal.Config.SampleExpirationMinutes = configuration.SampleExpirationMinutes;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.MaxDeliveryDurationMinutes != configuration.MaxDeliveryDurationMinutes)
         {
             s_dal.Config.MaxDeliveryDurationMinutes = configuration.MaxDeliveryDurationMinutes;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.FootSpeed != configuration.FootSpeed)
         {
             s_dal.Config.FootSpeed = configuration.FootSpeed;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.BikeSpeed != configuration.BikeSpeed)
         {
             s_dal.Config.BikeSpeed = configuration.BikeSpeed;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.MotorcycleSpeed != configuration.MotorcycleSpeed)
         {
             s_dal.Config.MotorcycleSpeed = configuration.MotorcycleSpeed;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.CarSpeed != configuration.CarSpeed)
         {
             s_dal.Config.CarSpeed = configuration.CarSpeed;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.BaseDeliveryPrice != configuration.BaseDeliveryPrice)
         {
             s_dal.Config.BaseDeliveryPrice = configuration.BaseDeliveryPrice;
-            configChanged = true;
+            changed = true;
         }
 
         if (s_dal.Config.PricePerKm != configuration.PricePerKm)
         {
             s_dal.Config.PricePerKm = configuration.PricePerKm;
-            configChanged = true;
+            changed = true;
         }
 
-        if (configChanged)
-            ConfigUpdatedObservers?.Invoke(); // stage 5
+        if (changed)
+            ConfigUpdatedObservers?.Invoke();
     }
 
-    internal static void ResetDB() //stage 4-7
+    /// <summary>
+    /// Resets the database and reinitializes
+    /// system configuration and clock.
+    /// </summary>
+    internal static void ResetDB()
     {
-        lock (BlMutex) //stage 7
+        lock (BlMutex)
         {
-            s_dal.ResetDB(); //stage 4
-            UpdateClock(Now); //stage 5
-            SetConfig(GetConfig()); //stage 5
+            s_dal.ResetDB();
+            UpdateClock(Now);
+            SetConfig(GetConfig());
         }
     }
 
-    internal static void InitializeDB() //stage 4-7
+    /// <summary>
+    /// Initializes the database and refreshes
+    /// system configuration and clock.
+    /// </summary>
+    internal static void InitializeDB()
     {
-        lock (BlMutex) //stage 7
+        lock (BlMutex)
         {
-            //DalTest.Initialization.Do(); //stage 4
-            UpdateClock(Now);  //stage 5
-            SetConfig(GetConfig()); //stage 5
+            UpdateClock(Now);
+            SetConfig(GetConfig());
         }
     }
-    #endregion
 
-    #region Stage 7 base
+    /// <summary>
+    /// Calculates the number of orders
+    /// grouped by their current status.
+    /// </summary>
+    /// <returns>Dictionary mapping order status to count.</returns>
+    internal static IDictionary<OrderStatus, int> GetOrdersCountByStatus()
+    {
+        var orders = s_dal.Order.ReadAll();
+        var deliveries = s_dal.Delivery.ReadAll();
+
+        return orders
+            .Select(order =>
+            {
+                var delivery = deliveries.FirstOrDefault(d => d.OrderId == order.Id);
+
+                if (delivery == null || delivery.CompletionStatus == null)
+                    return OrderStatus.Created;
+
+                return delivery.CompletionStatus switch
+                {
+                    DO.DeliveryStatus.InProgress => OrderStatus.InDelivery,
+                    DO.DeliveryStatus.Delivered => OrderStatus.Delivered,
+                    _ => OrderStatus.Failed
+                };
+            })
+            .GroupBy(status => status)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    /// <summary>
+    /// Synchronization object for BL critical sections.
+    /// </summary>
     internal static readonly object BlMutex = new();
-    #endregion
+
+    /// <summary>
+    /// Authenticates a user and returns their system role.
+    /// </summary>
+    /// <param name="id">User identifier.</param>
+    /// <param name="password">User password.</param>
+    /// <returns>User role.</returns>
+    /// <exception cref="BlInvalidCredentialsException">
+    /// Thrown when credentials are invalid.
+    /// </exception>
+    public static UserRole Login(string id, string password)
+    {
+        var config = GetConfig();
+
+        if (id == config.AdminId && password == config.AdminPassword)
+            return UserRole.Admin;
+
+        var courier = s_dal.Courier
+            .Read(c => c.Id.ToString() == id && c.Password == password);
+
+        if (courier != null)
+            return UserRole.Courier;
+
+        throw new BlInvalidCredentialsException("Invalid ID or password");
+    }
 }

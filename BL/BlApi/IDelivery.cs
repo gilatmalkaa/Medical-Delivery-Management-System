@@ -25,4 +25,13 @@ public interface IDelivery : IObservable
     /// </summary>
     IEnumerable<BO.DeliveryPerOrderInList> ReadAll(
         Func<BO.DeliveryPerOrderInList, bool>? filter = null);
+
+    /// <summary>
+    /// Retrieves all completed deliveries
+    /// assigned to a specific courier.
+    /// </summary>
+    /// <param name="courierId">Courier identifier.</param>
+    /// <returns>A collection of closed deliveries for the courier.</returns>
+    IEnumerable<BO.ClosedDeliveryInList> GetClosedDeliveriesByCourier(int courierId);
+
 }

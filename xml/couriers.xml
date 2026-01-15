@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfCourier xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Courier>
+    <Id>1</Id>
+    <FullName>israel israeli</FullName>
+    <Password>1234</Password>
+    <Phone>0501234567</Phone>
+    <Email>courier1@mail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>20</MaxPersonalDeliveryDistance>
+    <Type>Foot</Type>
+    <IsActive>true</IsActive>
+    <StartWorkDate>2024-01-01T00:00:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>2</Id>
+    <FullName>daniel levi</FullName>
+    <Password>abcd</Password>
+    <Phone>0529876543</Phone>
+    <Email>daniel.levi@mail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>25</MaxPersonalDeliveryDistance>
+    <Type>Bicycle</Type>
+    <IsActive>true</IsActive>
+    <StartWorkDate>2024-02-15T00:00:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>3</Id>
+    <FullName>noam cohen</FullName>
+    <Password>pass123</Password>
+    <Phone>0541112233</Phone>
+    <Email>noam.cohen@mail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>60</MaxPersonalDeliveryDistance>
+    <Type>Car</Type>
+    <IsActive>true</IsActive>
+    <StartWorkDate>2023-11-10T00:00:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>4</Id>
+    <FullName>shira mizrahi</FullName>
+    <Password>shira2024</Password>
+    <Phone>0508887766</Phone>
+    <Email>shira.m@mail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>10</MaxPersonalDeliveryDistance>
+    <Type>Foot</Type>
+    <IsActive>false</IsActive>
+    <StartWorkDate>2024-03-01T00:00:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>5</Id>
+    <FullName>omer ben-david</FullName>
+    <Password>omerpass</Password>
+    <Phone>0534449988</Phone>
+    <Email>omer.bd@mail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>40</MaxPersonalDeliveryDistance>
+    <Type>Bicycle</Type>
+    <IsActive>true</IsActive>
+    <StartWorkDate>2022-06-20T00:00:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>213452626</Id>
+    <FullName>David Levi</FullName>
+    <Password>david2024</Password>
+    <Phone>0509999999</Phone>
+    <Email>david@mail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>40</MaxPersonalDeliveryDistance>
+    <Type>Bicycle</Type>
+    <IsActive>true</IsActive>
+    <StartWorkDate>2024-01-01T00:00:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>0</Id>
+    <FullName>yam refaeli</FullName>
+    <Password />
+    <Phone>0583736256</Phone>
+    <Email>yami@gmail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>50</MaxPersonalDeliveryDistance>
+    <Type>Car</Type>
+    <IsActive>false</IsActive>
+    <StartWorkDate xsi:nil="true" />
+  </Courier>
+  <Courier>
+    <Id>213452627</Id>
+    <FullName>yam refaeli</FullName>
+    <Password />
+    <Phone>0536784764</Phone>
+    <Email>yami@gmail.com</Email>
+    <Signature />
+    <MaxPersonalDeliveryDistance>50</MaxPersonalDeliveryDistance>
+    <Type>Car</Type>
+    <IsActive>true</IsActive>
+    <StartWorkDate>2026-01-15T11:40:30.0905149+02:00</StartWorkDate>
+  </Courier>
+  <Courier>
+    <Id>213452628</Id>
+    <FullName>yedo nim</FullName>
+    <Password />
+    <Phone>0546737873</Phone>
+    <Email>y1@gmail.com</Email>
+    <MaxPersonalDeliveryDistance>20</MaxPersonalDeliveryDistance>
+    <Type>Motorcycle</Type>
+    <IsActive>false</IsActive>
+    <StartWorkDate>2026-01-15T11:43:26.4820888+02:00</StartWorkDate>
+  </Courier>
+</ArrayOfCourier>

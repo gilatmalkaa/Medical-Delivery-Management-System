@@ -18,7 +18,7 @@ public record Delivery(
     int Id,
     int OrderId,
     int CourierId,
-    DeliveryType Type,
+    OrderType Type,
     DateTime StartDeliveryDate,
     double ActualDistance,
     double? ExpectedDistance,
@@ -30,5 +30,5 @@ public record Delivery(
     /// Default constructor initializing an empty delivery record
     /// with default and placeholder values.
     /// </summary>
-    public Delivery() : this(0, 0, 0, DeliveryType.Foot, default, 0, null, DeliveryStatus.InProgress, null) { }
+    public Delivery() : this(0, 0, 0, OrderType.Express, default, 0, null, DeliveryStatus.InProgress, null) { }
 }
