@@ -1,8 +1,10 @@
 ﻿using BlApi;
 using BO;
+using PL.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,7 +17,17 @@ namespace PL.Delivery
     /// </summary>
     public partial class DeliveryListWindow : Window
     {
-        static readonly IBl s_bl = BlApi.Factory.Get();
+        /// <summary>
+        /// Business layer access.
+        /// </summary>
+        private static readonly IBl s_bl = Factory.Get();
+
+        /// <summary>
+        /// Synchronization mutex for clock observer updates (Stage 7).
+        /// Prevents concurrent or overlapping UI refreshes.
+        /// </summary>
+        private readonly ObserverMutex _deliveryMutex = new(); // stage 7
+
 
         /// <summary>
         /// Gets or sets the list of deliveries displayed in the window.
@@ -44,63 +56,102 @@ namespace PL.Delivery
         public BO.DeliveryStatus? SelectedStatus { get; set; }
 
         /// <summary>
-        /// Initializes the delivery list window and loads delivery data.
+        /// Initializes the delivery list window.
+        /// Actual data loading is done asynchronously on load.
         /// </summary>
         public DeliveryListWindow()
         {
             InitializeComponent();
-            DeliveryList = s_bl.Deliveries.ReadAll();
             DataContext = this;
+
+            Loaded += DeliveryListWindow_Loaded;
+        }
+
+        /// <summary>
+        /// Loads deliveries asynchronously when the window is loaded.
+        /// </summary>
+        private async void DeliveryListWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await RefreshListAsync();
         }
 
         /// <summary>
         /// Refreshes the delivery list according to the selected status filter.
+        /// Executes the BL call on a background thread.
         /// </summary>
-        private void RefreshList()
+        private async Task RefreshListAsync()
         {
-            DeliveryList = s_bl.Deliveries.ReadAll(
-                d => SelectedStatus == null || d.CompletionStatus == SelectedStatus);
+            if (_deliveryMutex.CheckAndSetLoadInProgressOrRestartRequired())
+                return;
+
+            await Dispatcher.BeginInvoke(async () =>
+            {
+                try
+                {
+                    var list = await Task.Run(() =>
+                        s_bl.Deliveries.ReadAll(
+                            d => SelectedStatus == null ||
+                                 d.CompletionStatus == SelectedStatus));
+
+                    DeliveryList = list;
+                }
+                finally
+                {
+                    if (await _deliveryMutex.UnsetLoadInProgressAndCheckRestartRequested())
+                        await RefreshListAsync();
+                }
+            });
         }
+
 
         /// <summary>
         /// Handles changes in the delivery status filter.
         /// </summary>
-        private void StatusFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void StatusFilter_SelectionChanged(
+            object sender,
+            SelectionChangedEventArgs e)
         {
-            RefreshList();
+            await RefreshListAsync();
         }
 
         /// <summary>
         /// Opens the delivery update window on double-click
         /// and refreshes the list after closing.
         /// </summary>
-        private void List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void List_MouseDoubleClick(
+            object sender,
+            MouseButtonEventArgs e)
         {
             if (SelectedDelivery is null)
                 return;
 
-            new DeliveryAddUpdateWindow(SelectedDelivery.DeliveryId).ShowDialog();
-            RefreshList();
+            new DeliveryAddUpdateWindow(
+                SelectedDelivery.DeliveryId).ShowDialog();
+
+            await RefreshListAsync();
         }
 
         /// <summary>
         /// Opens the delivery update window for the selected delivery.
         /// Creation of new deliveries is not allowed from this screen.
         /// </summary>
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private async void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedDelivery is null)
             {
                 MessageBox.Show(
-                    "A delivery cannot be created from this screen.\nSelect a delivery to manage it.",
-                    "Stage 6 restriction",
+                    "A delivery cannot be created from this screen.\n" +
+                    "Select a delivery to manage it.",
+                    "Stage 4 restriction",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
                 return;
             }
 
-            new DeliveryAddUpdateWindow(SelectedDelivery.DeliveryId).ShowDialog();
-            RefreshList();
+            new DeliveryAddUpdateWindow(
+                SelectedDelivery.DeliveryId).ShowDialog();
+
+            await RefreshListAsync();
         }
     }
 }

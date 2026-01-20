@@ -1,5 +1,6 @@
 ﻿using DalApi;
 using DO;
+using System.Runtime.CompilerServices;
 
 namespace Dal;
 
@@ -14,7 +15,10 @@ internal class CourierImplementation : ICourier
     /// Throws <see cref="DalAlreadyExistsException"/> if a courier with the same ID already exists.
     /// </summary>
     /// <param name="item">The courier to add.</param>
-   public void Create(Courier item)
+    /// 
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void Create(Courier item)
 {
     List<Courier> list =
         XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
@@ -34,6 +38,9 @@ internal class CourierImplementation : ICourier
     /// </summary>
     /// <param name="id">The unique courier ID.</param>
     /// <returns>The courier with the specified ID or null if not found.</returns>
+    /// 
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Courier? Read(int id)
     {
         List<Courier> list = XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
@@ -46,6 +53,8 @@ internal class CourierImplementation : ICourier
     /// </summary>
     /// <param name="filter">A predicate function to filter couriers.</param>
     /// <returns>The first matching courier or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Courier? Read(Func<Courier, bool> filter)
     {
         List<Courier> list = XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
@@ -58,6 +67,9 @@ internal class CourierImplementation : ICourier
     /// </summary>
     /// <param name="filter">Optional predicate to filter the couriers.</param>
     /// <returns>An enumerable of couriers.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
+
     public IEnumerable<Courier> ReadAll(Func<Courier, bool>? filter = null)
     {
         List<Courier> list = XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
@@ -69,6 +81,9 @@ internal class CourierImplementation : ICourier
     /// Throws <see cref="DalDoesNotExistException"/> if the courier does not exist.
     /// </summary>
     /// <param name="item">The courier with updated information.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
+
     public void Update(Courier item)
     {
         List<Courier> list = XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
@@ -86,6 +101,9 @@ internal class CourierImplementation : ICourier
     /// Throws <see cref="DalDoesNotExistException"/> if the courier does not exist.
     /// </summary>
     /// <param name="id">The unique courier ID to delete.</param>
+    /// 
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
         List<Courier> list = XMLTools.LoadListFromXMLSerializer<Courier>(Config.s_couriers_xml);
@@ -99,6 +117,9 @@ internal class CourierImplementation : ICourier
     /// <summary>
     /// Deletes all couriers from the XML data store.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
+
     public void DeleteAll()
     {
         XMLTools.SaveListToXMLSerializer(new List<Courier>(), Config.s_couriers_xml);

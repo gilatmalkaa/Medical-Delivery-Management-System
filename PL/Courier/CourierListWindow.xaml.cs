@@ -1,11 +1,14 @@
 ﻿using BlApi;
 using BO;
+using PL.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+
 
 namespace PL.Courier
 {
@@ -15,7 +18,17 @@ namespace PL.Courier
     /// </summary>
     public partial class CourierListWindow : Window
     {
+        /// <summary>
+        /// Business logic facade used for courier operations.
+        /// </summary>
         static readonly IBl s_bl = BlApi.Factory.Get();
+
+        /// <summary>
+        /// Synchronization mutex for clock observer updates (Stage 7).
+        /// Prevents concurrent or overlapping UI refreshes.
+        /// </summary>
+        private readonly ObserverMutex _couriersMutex = new(); // stage 7
+
 
         /// <summary>
         /// Gets or sets the list of couriers displayed in the window.
@@ -26,22 +39,44 @@ namespace PL.Courier
             set => SetValue(CourierListProperty, value);
         }
 
+        /// <summary>
+        /// Dependency property backing the CourierList property,
+        /// enabling data binding for the couriers list in the UI.
+        /// </summary>
         public static readonly DependencyProperty CourierListProperty =
+    DependencyProperty.Register(
+        nameof(CourierList),
+        typeof(IEnumerable<CourierInList>),
+        typeof(CourierListWindow),
+        new PropertyMetadata(null));
+
+        /// <summary>
+        /// Gets or sets the currently selected courier
+        /// in the couriers list.
+        /// </summary>
+        public CourierInList? SelectedCourier
+        {
+            get => (CourierInList?)GetValue(SelectedCourierProperty);
+            set => SetValue(SelectedCourierProperty, value);
+        }
+
+        /// <summary>
+        /// Dependency property backing the SelectedCourier property,
+        /// used to track the selected courier in the UI.
+        /// </summary>
+        public static readonly DependencyProperty SelectedCourierProperty =
             DependencyProperty.Register(
-                nameof(CourierList),
-                typeof(IEnumerable<CourierInList>),
+                nameof(SelectedCourier),
+                typeof(CourierInList),
                 typeof(CourierListWindow),
                 new PropertyMetadata(null));
+
 
         /// <summary>
         /// Gets or sets the currently selected courier type filter.
         /// </summary>
-        public BO.CourierType? SelectedType { get; set; } = null;
+        public object? SelectedType { get; set; } = null;
 
-        /// <summary>
-        /// Gets or sets the currently selected courier.
-        /// </summary>
-        public CourierInList? SelectedCourier { get; set; }
 
         /// <summary>
         /// Initializes the courier list window and loads courier data.
@@ -49,84 +84,148 @@ namespace PL.Courier
         public CourierListWindow()
         {
             InitializeComponent();
-            CourierList = s_bl.Couriers.GetAll();
             DataContext = this;
         }
 
         /// <summary>
         /// Refreshes the courier list according to the selected filter.
         /// </summary>
-        private void queryList()
+        private async Task LoadCouriersAsync()
         {
-            var list = s_bl.Couriers.GetAll();
-            CourierList = SelectedType == null
-                ? list
-                : list.Where(c => c.Type == SelectedType);
+            try
+            {
+                var list = await Task.Run(() => s_bl.Couriers.GetAll());
+
+                CourierList = SelectedType switch
+                {
+                    null => list,
+                    string => list,
+                    BO.CourierType type => list.Where(c => c.Type == type),
+                    _ => list
+                };
+            }
+            catch (BO.BLTemporaryNotAvailableException ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Simulator is running",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
         }
+
+
 
         /// <summary>
         /// Handles changes in the filter selection and updates the list accordingly.
         /// </summary>
-        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var comboBox = sender as ComboBox;
-            var selected = comboBox?.SelectedItem;
-
-            var list = s_bl.Couriers.GetAll();
-
-            if (selected == null || selected is string)
-            {
-                CourierList = list;
-            }
-            else
-            {
-                CourierList = list.Where(c => c.Type == (CourierType)selected);
-            }
+            await LoadCouriersAsync();
         }
+
 
         /// <summary>
         /// Refreshes the UI when courier data changes.
         /// </summary>
         private void observerRefresh()
         {
-            Dispatcher.Invoke(queryList);
+            if (_couriersMutex.CheckAndSetLoadInProgressOrRestartRequired())
+                return;
+
+            Dispatcher.BeginInvoke(async () =>
+            {
+                try
+                {
+                    await LoadCouriersAsync();
+                }
+                finally
+                {
+                    if (await _couriersMutex.UnsetLoadInProgressAndCheckRestartRequested())
+                        observerRefresh();
+                }
+            });
         }
+
+
+
+
 
         /// <summary>
         /// Registers an observer when the window is loaded.
         /// </summary>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-            => s_bl.Couriers.AddObserver(observerRefresh);
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            s_bl.Couriers.AddObserver(observerRefresh);
+            s_bl.Admin.AddClockObserver(observerRefresh);
+            await LoadCouriersAsync();
+        }
+
 
         /// <summary>
         /// Unregisters the observer when the window is closed.
         /// </summary>
         private void Window_Closed(object sender, EventArgs e)
-            => s_bl.Couriers.RemoveObserver(observerRefresh);
+        { 
+            s_bl.Couriers.RemoveObserver(observerRefresh);
+            s_bl.Admin.RemoveClockObserver(observerRefresh);
+        }
 
         /// <summary>
         /// Opens the add/update window when a courier is double-clicked.
         /// </summary>
-        private void List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void List_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is DataGrid grid &&
                 grid.SelectedItem is CourierInList courier)
             {
-                new CourierAddUpdateWindow(courier.Id).ShowDialog();
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        s_bl.Couriers.Get(courier.Id);
+                    });
+
+                    new CourierAddUpdateWindow(courier.Id).ShowDialog();
+                }
+                catch (BO.BLTemporaryNotAvailableException ex)
+                {
+                    MessageBox.Show(
+                        ex.Message,
+                        "Simulator is running",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
             }
         }
+
 
 
         /// <summary>
         /// Opens the add courier window.
         /// </summary>
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
-            => new CourierAddUpdateWindow(0).ShowDialog();
+        private async void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await Task.Run(() => { });
+
+                new CourierAddUpdateWindow(0).ShowDialog();
+            }
+            catch (BO.BLTemporaryNotAvailableException ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Simulator is running",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
 
         /// <summary>
         /// Deletes the selected courier after user confirmation.
         /// </summary>
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedCourier == null)
             {
@@ -145,7 +244,19 @@ namespace PL.Courier
 
             try
             {
-                s_bl.Couriers.Delete(SelectedCourier.Id);
+                if (!SelectedCourier.CanDelete)
+                {
+                    MessageBox.Show(
+                        "Courier has active deliveries and cannot be deleted.",
+                        "Operation not allowed",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                int _id = SelectedCourier.Id;   
+                await Task.Run(() => s_bl.Couriers.Delete(_id));
+
             }
             catch (BO.BlPermissionException ex)
             {
@@ -155,6 +266,10 @@ namespace PL.Courier
             {
                 MessageBox.Show("Failed to delete courier.");
             }
+
+            await LoadCouriersAsync();
+
+
         }
     }
 }

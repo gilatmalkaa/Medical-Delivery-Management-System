@@ -2,7 +2,9 @@
 using BO;
 using PL.Helpers;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace PL.Courier
 {
@@ -12,19 +14,69 @@ namespace PL.Courier
     /// </summary>
     public partial class CourierAddUpdateWindow : Window
     {
-        static readonly IBl s_bl = BlApi.Factory.Get();
+        /// <summary>
+        /// Business logic facade used for courier operations.
+        /// </summary>
+        private static readonly IBl s_bl = BlApi.Factory.Get();
+
+        /// <summary>
+        /// Identifier of the courier being edited.
+        /// Value 0 indicates add mode.
+        /// </summary>
+        private readonly int _courierId;
 
         /// <summary>
         /// Indicates whether the window is in add mode.
         /// </summary>
-        public bool IsAddMode { get; }
+        public bool IsAddMode => _courierId == 0;
 
-        public bool IsAdmin { get; }
+        /// <summary>
+        /// Determines whether the courier type field is editable.
+        /// Editing is allowed only when adding a new courier
+        /// and the current user has admin privileges.
+        /// </summary>
+        public bool CanEditCourierType =>
+            IsAddMode && IsAdmin;
+
+
+        /// <summary>
+        /// Indicates whether the current user is an admin.
+        /// </summary>
+        public bool IsAdmin
+        {
+            get => (bool)GetValue(IsAdminProperty);
+            set => SetValue(IsAdminProperty, value);
+        }
+
+        /// <summary>
+        /// Dependency property backing store for IsAdmin.
+        /// </summary> 
+        /// 
+        public static readonly DependencyProperty IsAdminProperty =
+            DependencyProperty.Register(
+                nameof(IsAdmin),
+                typeof(bool),
+                typeof(CourierAddUpdateWindow),
+                new PropertyMetadata(false));
 
         /// <summary>
         /// Gets or sets the courier currently being edited.
         /// </summary>
-        public BO.Courier CurrentCourier { get; set; }
+        public BO.Courier CurrentCourier
+        {
+            get => (BO.Courier)GetValue(CurrentCourierProperty);
+            set => SetValue(CurrentCourierProperty, value);
+        }
+
+        /// <summary>
+        /// Dependency property backing store for CurrentCourier.
+        /// </summary>
+        public static readonly DependencyProperty CurrentCourierProperty =
+            DependencyProperty.Register(
+                nameof(CurrentCourier),
+                typeof(BO.Courier),
+                typeof(CourierAddUpdateWindow),
+                new PropertyMetadata(null));
 
         /// <summary>
         /// Gets the text displayed on the main action button.
@@ -33,100 +85,154 @@ namespace PL.Courier
             IsAddMode ? "Add Courier" : "Update Courier";
 
         /// <summary>
-        /// Initializes the window in add or update mode
-        /// according to the provided courier identifier.
+        /// Initializes the window.
         /// </summary>
         public CourierAddUpdateWindow(int id)
         {
             InitializeComponent();
 
-            IsAddMode = id == 0;
-
-            CurrentCourier = IsAddMode
-                ? new BO.Courier()
-                : s_bl.Couriers.Get(id)!;
+            _courierId = id;
+            IsAdmin = SessionManager.Role == UserRole.Admin;
 
             CourierTypeCombo.ItemsSource =
+                Enum.GetValues(typeof(BO.CourierType));
 
-                Enum.GetValues(typeof(DeliveryType));
-                IsAdmin = SessionManager.Role == UserRole.Admin;
+            Loaded += CourierAddUpdateWindow_Loaded;
 
             DataContext = this;
         }
 
         /// <summary>
-        /// Saves the courier by creating a new record
-        /// or updating an existing one.
+        /// Loads courier data asynchronously.
         /// </summary>
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private async void CourierAddUpdateWindow_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
+                BO.Courier courier;
+
+                Mouse.OverrideCursor = Cursors.Wait;
+
                 if (IsAddMode)
-                    s_bl.Couriers.Create(CurrentCourier);
+                {
+                    courier = new BO.Courier { IsActive = true };
+                }
                 else
-                    s_bl.Couriers.Update(CurrentCourier);
+                {
+                    courier = await Task.Run(() => s_bl.Couriers.Get(_courierId));
+                }
 
+                CurrentCourier = courier;
+            }
+            catch (BO.BLTemporaryNotAvailableException ex)
+            {
                 MessageBox.Show(
-                    "Courier saved successfully",
-                    "Success",
+                    ex.Message,
+                    "Simulator is running",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                    MessageBoxImage.Warning);
 
-                Close(); 
+                Close();
             }
-            catch (BlInvalidInputException ex)
+            finally
             {
-                MessageBox.Show(ex.Message, "Invalid Input");
-            }
-            catch (BlAlreadyExistsException ex)
-            {
-                MessageBox.Show(ex.Message, "Already Exists");
-            }
-            catch (BlNullPropertyException ex)
-            {
-                MessageBox.Show(ex.Message, "Missing Data");
+                Mouse.OverrideCursor = null;
             }
         }
 
 
         /// <summary>
-        /// Deletes the current courier after user confirmation.
+        /// Executes an asynchronous function while displaying a wait cursor
+        /// and returns its result.
         /// </summary>
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private async Task<T> RunWithWaitCursorAsync<T>(Func<Task<T>> action)
         {
-            if (IsAddMode)
-                return;
+            Mouse.OverrideCursor = Cursors.Wait;
+            try
+            {
+                return await action();
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
+        }
 
-            var result = MessageBox.Show(
-                "Are you sure you want to delete this courier?",
-                "Confirm Delete",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
 
-            if (result != MessageBoxResult.Yes)
+
+        /// <summary>
+        /// Saves the courier by creating or updating it.
+        /// </summary>
+        private async void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                BO.Courier _courier = CurrentCourier;
+                bool _isAdd = IsAddMode;
+
+                await Task.Run(() =>
+                {
+                    if (_isAdd)
+                        s_bl.Couriers.Create(_courier);
+                    else
+                        s_bl.Couriers.Update(_courier);
+                });
+
+                MessageBox.Show("Courier saved successfully", "Success",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                Close();
+            }
+            catch (BlInvalidInputException ex) { MessageBox.Show(ex.Message, "Invalid Input"); }
+            catch (BlAlreadyExistsException ex) { MessageBox.Show(ex.Message, "Already Exists"); }
+            catch (BlNullPropertyException ex) { MessageBox.Show(ex.Message, "Missing Data"); }
+            finally { Mouse.OverrideCursor = null; }
+        }
+
+
+        /// <summary>
+        /// Deletes the current courier after confirmation.
+        /// </summary>
+        private async void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsAddMode) return;
+
+            if (MessageBox.Show("Are you sure you want to delete this courier?",
+                "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
                 return;
 
             try
             {
-                s_bl.Couriers.Delete(CurrentCourier.Id);
+                Mouse.OverrideCursor = Cursors.Wait;
 
-                MessageBox.Show(
-                    "Courier deleted successfully",
-                    "Deleted",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                int _id = CurrentCourier.Id;
+
+                await Task.Run(() => s_bl.Couriers.Delete(_id));
+
+                MessageBox.Show("Courier deleted successfully", "Deleted",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
 
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    ex.Message,
-                    "Delete Failed",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Delete Failed",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            finally { Mouse.OverrideCursor = null; }
+        }
+
+
+        /// <summary>
+        /// Runs an async action with a wait cursor.
+        /// </summary>
+        private async Task RunWithWaitCursorAsync(Func<Task> action)
+        {
+            Mouse.OverrideCursor = Cursors.Wait;
+            try { await action(); }
+            finally { Mouse.OverrideCursor = null; }
         }
     }
 }

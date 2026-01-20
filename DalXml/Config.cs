@@ -6,12 +6,20 @@
 /// </summary>
 internal static class Config
 {
+    /// <summary>
+    /// Administrator identifier used for system-level authentication.
+    /// Stored in the main configuration XML file.
+    /// </summary>
     internal static string AdminId
     {
         get => XMLTools.GetConfigStringVal(s_data_config_xml, "AdminId");
         set => XMLTools.SetConfigStringVal(s_data_config_xml, "AdminId", value);
     }
 
+    /// <summary>
+    /// Administrator password used for system-level authentication.
+    /// Stored securely in the main configuration XML file.
+    /// </summary>
     internal static string AdminPassword
     {
         get => XMLTools.GetConfigStringVal(s_data_config_xml, "AdminPassword");

@@ -4,7 +4,7 @@
   <AdminId>123456789</AdminId>
   <AdminPassword>admin123</AdminPassword>
   <!-- ===== System time ===== -->
-  <Clock>12/01/2026 20:28:13</Clock>
+  <Clock>19/01/2026 09:48:13</Clock>
   <!-- ===== Delivery constraints ===== -->
   <MaxRange>30</MaxRange>
   <SampleExpirationMinutes>90</SampleExpirationMinutes>

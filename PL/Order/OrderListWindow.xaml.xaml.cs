@@ -1,8 +1,10 @@
 ﻿using BlApi;
 using BO;
+using PL.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,7 +18,17 @@ namespace PL.Order
     /// </summary>
     public partial class OrderListWindow : Window
     {
+        /// <summary>
+        /// Business logic facade used by the admin window.
+        /// </summary>
         static readonly IBl s_bl = BlApi.Factory.Get();
+
+
+        /// <summary>
+        /// Synchronization mutex for clock observer updates (Stage 7).
+        /// Prevents concurrent or overlapping UI refreshes.
+        /// </summary>
+        private readonly ObserverMutex _orderMutex = new(); // stage 7
 
         /// <summary>
         /// Gets or sets the list of orders displayed in the window.
@@ -45,76 +57,111 @@ namespace PL.Order
         public OrderInList? SelectedOrder { get; set; }
 
         /// <summary>
-        /// Initializes the order list window and loads order data.
+        /// Initializes the order list window.
+        /// Data is loaded asynchronously on window load.
         /// </summary>
         public OrderListWindow()
         {
             InitializeComponent();
-            OrderList = s_bl.Orders.GetAll();
             DataContext = this;
+        }
+
+        /// <summary>
+        /// Loads the orders asynchronously and applies the filter.
+        /// </summary>
+        private async Task LoadOrdersAsync()
+        {
+            var allOrders = await Task.Run(() => s_bl.Orders.GetAll());
+
+            OrderList =
+                SelectedStatus == null || SelectedStatus == BO.OrderStatus.All
+                    ? allOrders
+                    : allOrders.Where(o => o.OrderStatus == SelectedStatus);
         }
 
         /// <summary>
         /// Handles changes in the status filter selection.
         /// </summary>
-        private void StatusFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-            => queryOrderList();
-
-        /// <summary>
-        /// Refreshes the order list according to the selected status filter.
-        /// </summary>
-        private void queryOrderList()
+        private async void StatusFilter_SelectionChanged(
+            object sender,
+            SelectionChangedEventArgs e)
         {
-            OrderList =
-                (SelectedStatus == null || SelectedStatus == BO.OrderStatus.All)
-                ? s_bl.Orders.GetAll()!
-                : s_bl.Orders
-                      .GetAll()!
-                      .Where(o => o.OrderStatus == SelectedStatus);
+            await LoadOrdersAsync();
         }
 
         /// <summary>
-        /// Refreshes the order list when changes occur in the business layer.
+        /// Observer callback to refresh the list when BL changes.
         /// </summary>
-        private void orderListObserver() => queryOrderList();
+        private void OrderListObserver()
+        {
+            if (_orderMutex.CheckAndSetLoadInProgressOrRestartRequired())
+                return;
+
+            Dispatcher.BeginInvoke(async () =>
+            {
+                try
+                {
+                    await LoadOrdersAsync();
+                }
+                finally
+                {
+                    if (await _orderMutex.UnsetLoadInProgressAndCheckRestartRequested())
+                        OrderListObserver();
+                }
+            });
+        }
+
 
         /// <summary>
-        /// Registers the observer when the window is loaded.
+        /// Registers the observer and loads data on window load.
         /// </summary>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-            => s_bl.Orders.AddObserver(orderListObserver);
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            s_bl.Orders.AddObserver(OrderListObserver);
+            s_bl.Admin.AddClockObserver(OrderListObserver); 
+
+            await LoadOrdersAsync();
+        }
 
         /// <summary>
         /// Unregisters the observer when the window is closed.
         /// </summary>
         private void Window_Closed(object sender, EventArgs e)
-            => s_bl.Orders.RemoveObserver(orderListObserver);
+        {
+            s_bl.Orders.RemoveObserver(OrderListObserver);
+            s_bl.Admin.RemoveClockObserver(OrderListObserver);
+
+        }
 
         /// <summary>
         /// Opens the order details window for the selected order.
         /// </summary>
-        private void OrdersList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void OrdersList_MouseDoubleClick(
+            object sender,
+            MouseButtonEventArgs e)
         {
             if (SelectedOrder == null)
                 return;
 
-            var win = new OrderDetailsWindow(SelectedOrder.OrderId);
-            win.ShowDialog();
+            new OrderDetailsWindow(SelectedOrder.OrderId).ShowDialog();
         }
 
         /// <summary>
         /// Opens the order details window in create mode.
         /// </summary>
-        private void btnAddOrder_Click(object sender, RoutedEventArgs e)
+        private void btnAddOrder_Click(
+            object sender,
+            RoutedEventArgs e)
         {
-            var win = new OrderDetailsWindow(0);
-            win.ShowDialog();
+            new OrderDetailsWindow(0).ShowDialog();
         }
 
         /// <summary>
         /// Displays a message indicating that deleting orders is not supported.
         /// </summary>
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void BtnDelete_Click(
+            object sender,
+            RoutedEventArgs e)
         {
             MessageBox.Show(
                 "Deleting an order is not allowed in the system.",
@@ -128,7 +175,9 @@ namespace PL.Order
         /// <summary>
         /// Cancels the selected order if allowed.
         /// </summary>
-        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        private async void BtnCancel_Click(
+            object sender,
+            RoutedEventArgs e)
         {
             if (sender is not Button btn ||
                 btn.DataContext is not OrderInList order)
@@ -136,7 +185,10 @@ namespace PL.Order
 
             try
             {
-                s_bl.Orders.Cancel(order.OrderId);
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                await Task.Run(() =>
+                    s_bl.Orders.Cancel(order.OrderId));
             }
             catch (Exception ex)
             {
@@ -146,6 +198,10 @@ namespace PL.Order
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
 
             e.Handled = true;
         }
@@ -153,7 +209,9 @@ namespace PL.Order
         /// <summary>
         /// Prevents mouse interaction from propagating further.
         /// </summary>
-        private void Button_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void Button_PreviewMouseDown(
+            object sender,
+            MouseButtonEventArgs e)
         {
             e.Handled = true;
         }

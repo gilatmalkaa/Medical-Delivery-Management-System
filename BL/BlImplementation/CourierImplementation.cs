@@ -14,13 +14,21 @@ internal class CourierImplementation : ICourier
     /// Creates a new courier in the system.
     /// </summary>
     /// <param name="item">Courier business object to create.</param>
-    public void Create(Courier item) => CourierManager.Create(item);
+    public void Create(Courier item)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning(); 
+        CourierManager.Create(item);
+    }
 
     /// <summary>
     /// Deletes an existing courier by its identifier.
     /// </summary>
     /// <param name="id">Courier identifier.</param>
-    public void Delete(int id) => CourierManager.Delete(id);
+    public void Delete(int id)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        CourierManager.Delete(id);
+    }
 
     /// <summary>
     /// Retrieves a courier by its unique identifier.
@@ -49,7 +57,11 @@ internal class CourierImplementation : ICourier
     /// Updates an existing courier with new data.
     /// </summary>
     /// <param name="item">Courier object containing updated information.</param>
-    public void Update(Courier item) => CourierManager.Update(item);
+    public void Update(Courier item)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        CourierManager.Update(item);
+    }
 
     // ===== Stage 5 Observer Support =====
 
@@ -93,6 +105,7 @@ internal class CourierImplementation : ICourier
     /// <param name="orderId">Order identifier.</param>
     public void AssignOrder(int courierId, int orderId)
     {
+        AdminManager.ThrowOnSimulatorIsRunning();
         CourierManager.AssignOrder(courierId, orderId);
     }
 
@@ -100,8 +113,11 @@ internal class CourierImplementation : ICourier
     /// Completes the courier's currently active delivery.
     /// </summary>
     /// <param name="courierId">Courier identifier.</param>
-    public void CompleteDelivery(int courierId) =>
+    public void CompleteDelivery(int courierId)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
         CourierManager.CompleteDelivery(courierId);
+    }
 
     /// <summary>
     /// Retrieves all open orders that the specified courier

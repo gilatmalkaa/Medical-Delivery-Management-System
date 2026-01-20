@@ -53,13 +53,27 @@
 
             <!-- TOP GRID -->
             <Grid Margin="0,0,0,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
                 <!-- SYSTEM TIME -->
-                <Border Grid.Column="0" Style="{StaticResource Card}">
+               <Button x:Name="SimulatorToggleButton"
+        Grid.Row="0"
+        Grid.ColumnSpan="2"
+        Content="Start Simulator"
+        Style="{StaticResource PrimaryButton}"
+        Click="btnSimulatorToggle_Click"
+        Margin="0,0,0,12"/>
+
+                <Border Grid.Row="1"
+        Grid.Column="0"
+        Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock Text="System Time" Style="{StaticResource SectionTitle}"/>
                         <TextBlock Text="{Binding CurrentTime}"
@@ -68,17 +82,40 @@
                                    Margin="0,0,0,12"/>
 
                         <WrapPanel>
-                            <Button Content="Minute" Style="{StaticResource PrimaryButton}" Click="btnAddOneMinute_Click"/>
-                            <Button Content="Hour" Style="{StaticResource PrimaryButton}" Click="btnAddOneHour_Click"/>
-                            <Button Content="Day" Style="{StaticResource PrimaryButton}" Click="btnAddOneDay_Click"/>
-                            <Button Content="Month" Style="{StaticResource PrimaryButton}" Click="btnAddOneMonth_Click"/>
-                            <Button Content="Year" Style="{StaticResource PrimaryButton}" Click="btnAddOneYear_Click"/>
+                            <Button x:Name="BtnMinute"
+        Content="Minute"
+        Style="{StaticResource PrimaryButton}"
+        Click="btnAddOneMinute_Click"/>
+
+                            <Button x:Name="BtnHour"
+        Content="Hour"
+        Style="{StaticResource PrimaryButton}"
+        Click="btnAddOneHour_Click"/>
+
+                            <Button x:Name="BtnDay"
+        Content="Day"
+        Style="{StaticResource PrimaryButton}"
+        Click="btnAddOneDay_Click"/>
+
+                            <Button x:Name="BtnMonth"
+        Content="Month"
+        Style="{StaticResource PrimaryButton}"
+        Click="btnAddOneMonth_Click"/>
+
+                            <Button x:Name="BtnYear"
+        Content="Year"
+        Style="{StaticResource PrimaryButton}"
+        Click="btnAddOneYear_Click"/>
+
                         </WrapPanel>
                     </StackPanel>
                 </Border>
 
                 <!-- ORDERS SUMMARY -->
-                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="10,0,0,16">
+                <Border Grid.Row="1"
+        Grid.Column="1"
+        Style="{StaticResource Card}"
+        Margin="10,0,0,16">
                     <StackPanel>
 
                         <TextBlock Text="Orders Summary"

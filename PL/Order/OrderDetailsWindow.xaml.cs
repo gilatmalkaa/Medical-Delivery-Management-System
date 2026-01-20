@@ -1,6 +1,10 @@
 ﻿using BlApi;
+using BO;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace PL.Order
 {
@@ -10,7 +14,16 @@ namespace PL.Order
     /// </summary>
     public partial class OrderDetailsWindow : Window
     {
+        /// <summary>
+        /// Business logic facade used for order-related operations.
+        /// </summary>
         private static readonly IBl s_bl = BlApi.Factory.Get();
+
+        /// <summary>
+        /// Holds the identifier of the order being displayed or edited.
+        /// A value of 0 indicates creation mode.
+        /// </summary>
+        private readonly int _orderId;
 
         /// <summary>
         /// Gets the order currently being displayed or edited.
@@ -20,7 +33,7 @@ namespace PL.Order
         /// <summary>
         /// Indicates whether the window is in update mode.
         /// </summary>
-        public bool IsUpdateMode { get; }
+        public bool IsUpdateMode => _orderId != 0;
 
         /// <summary>
         /// Gets the text displayed on the main action button.
@@ -43,56 +56,93 @@ namespace PL.Order
                 BO.OrderStatus.InDelivery;
 
         /// <summary>
-        /// Initializes the window in create or update mode
-        /// according to the provided order identifier.
+        /// Initializes the window.
+        /// Data loading is performed asynchronously on load.
         /// </summary>
         public OrderDetailsWindow(int id)
         {
             InitializeComponent();
 
-            if (id == 0)
-            {
-                IsUpdateMode = false;
-
-                CurrentOrder = new BO.Order
-                {
-                    Id = 0,
-                    CreatedAt = DateTime.Now,
-                    OrderStatus = BO.OrderStatus.Created,
-                    ScheduleStatus = BO.ScheduleStatus.Scheduled,
-                    TimeRemaining = null,
-                    Deliveries = new List<BO.DeliveryPerOrderInList>()
-                };
-            }
-            else
-            {
-                IsUpdateMode = true;
-                CurrentOrder = s_bl.Orders.Get(id);
-            }
-
+            _orderId = id;
             DataContext = this;
+
+            Loaded += OrderDetailsWindow_Loaded;
         }
 
         /// <summary>
-        /// Saves the order by creating a new one
-        /// or updating an existing order.
+        /// Loads order data asynchronously.
         /// </summary>
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private async void OrderDetailsWindow_Loaded(
+            object sender,
+            RoutedEventArgs e)
         {
             try
             {
-                if (IsUpdateMode)
-                {
-                    if (CurrentOrder.OrderStatus != BO.OrderStatus.Created)
-                        throw new InvalidOperationException(
-                            "Cannot update a closed order");
+                Mouse.OverrideCursor = Cursors.Wait;
 
-                    s_bl.Orders.Update(CurrentOrder);
+                if (_orderId == 0)
+                {
+                    CurrentOrder = new BO.Order
+                    {
+                        Id = 0,
+                        CreatedAt = DateTime.Now,
+                        OrderStatus = BO.OrderStatus.Created,
+                        ScheduleStatus = BO.ScheduleStatus.Scheduled,
+                        TimeRemaining = null,
+                        Deliveries = new List<BO.DeliveryPerOrderInList>()
+                    };
                 }
                 else
                 {
-                    s_bl.Orders.Create(CurrentOrder);
+                    CurrentOrder = await Task.Run(() =>
+                        s_bl.Orders.Get(_orderId));
                 }
+
+                DataContext = null;
+                DataContext = this;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Failed to load order",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Close();
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
+        }
+
+        /// <summary>
+        /// Saves the order by creating or updating it.
+        /// </summary>
+        private async void BtnSave_Click(
+            object sender,
+            RoutedEventArgs e)
+        {
+            try
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                await Task.Run(() =>
+                {
+                    if (IsUpdateMode)
+                    {
+                        if (CurrentOrder.OrderStatus != BO.OrderStatus.Created)
+                            throw new InvalidOperationException(
+                                "Cannot update a closed order");
+
+                        s_bl.Orders.Update(CurrentOrder);
+                    }
+                    else
+                    {
+                        s_bl.Orders.Create(CurrentOrder);
+                    }
+                });
 
                 MessageBox.Show(
                     "Operation completed successfully",
@@ -110,16 +160,25 @@ namespace PL.Order
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
         }
 
         /// <summary>
         /// Cancels the current order if allowed.
         /// </summary>
-        private void BtnCancelOrder_Click(object sender, RoutedEventArgs e)
+        private async void BtnCancelOrder_Click(
+            object sender,
+            RoutedEventArgs e)
         {
             try
             {
-                s_bl.Orders.Cancel(CurrentOrder.Id);
+                Mouse.OverrideCursor = Cursors.Wait;
+
+                await Task.Run(() =>
+                    s_bl.Orders.Cancel(CurrentOrder.Id));
 
                 MessageBox.Show(
                     "Order canceled successfully",
@@ -136,6 +195,10 @@ namespace PL.Order
                     "Cannot cancel order",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
             }
         }
     }

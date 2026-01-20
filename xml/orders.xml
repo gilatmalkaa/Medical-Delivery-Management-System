@@ -11,7 +11,7 @@
     <CustomerPhone>0501234567</CustomerPhone>
     <Weight>1.2</Weight>
     <OpenDate>2026-01-10T09:15:00</OpenDate>
-    <Status>Created</Status>
+    <Status>InDelivery</Status>
   </Order>
   <Order>
     <Id>1002</Id>
@@ -24,7 +24,7 @@
     <CustomerPhone>0529876543</CustomerPhone>
     <Weight>0.8</Weight>
     <OpenDate>2026-01-11T11:40:00</OpenDate>
-    <Status>Created</Status>
+    <Status>InDelivery</Status>
   </Order>
   <Order>
     <Id>1003</Id>
@@ -50,7 +50,7 @@
     <CustomerPhone>0536784746</CustomerPhone>
     <Weight>0</Weight>
     <OpenDate>2026-01-14T20:40:11.0082505+02:00</OpenDate>
-    <Status>Created</Status>
+    <Status>InDelivery</Status>
   </Order>
   <Order>
     <Id>1005</Id>
@@ -76,7 +76,7 @@
     <CustomerPhone>0521122334</CustomerPhone>
     <Weight>0.6</Weight>
     <OpenDate>2026-01-15T10:15:00</OpenDate>
-    <Status>Created</Status>
+    <Status>InDelivery</Status>
   </Order>
   <Order>
     <Id>1008</Id>
@@ -89,7 +89,7 @@
     <CustomerPhone>0523344556</CustomerPhone>
     <Weight>0.2</Weight>
     <OpenDate>2026-01-15T11:20:00</OpenDate>
-    <Status>Created</Status>
+    <Status>InDelivery</Status>
   </Order>
   <Order>
     <Id>1009</Id>
@@ -102,6 +102,32 @@
     <CustomerPhone>0546655443</CustomerPhone>
     <Weight>1.1</Weight>
     <OpenDate>2026-01-15T11:45:00</OpenDate>
-    <Status>Created</Status>
+    <Status>InDelivery</Status>
+  </Order>
+  <Order>
+    <Id>1201</Id>
+    <Type>Regular</Type>
+    <Description>New order</Description>
+    <Address>Tel Aviv</Address>
+    <Latitude>0</Latitude>
+    <Longitude>0</Longitude>
+    <CustomerName>Test User</CustomerName>
+    <CustomerPhone>0500000000</CustomerPhone>
+    <Weight>2</Weight>
+    <OpenDate>2026-01-19T09:00:00</OpenDate>
+    <Status>InDelivery</Status>
+  </Order>
+  <Order>
+    <Id>1202</Id>
+    <Type>Express</Type>
+    <Description>Urgent order</Description>
+    <Address>Jerusalem</Address>
+    <Latitude>0</Latitude>
+    <Longitude>0</Longitude>
+    <CustomerName>Another User</CustomerName>
+    <CustomerPhone>0511111111</CustomerPhone>
+    <Weight>1</Weight>
+    <OpenDate>2026-01-19T09:30:00</OpenDate>
+    <Status>InDelivery</Status>
   </Order>
 </ArrayOfOrder>

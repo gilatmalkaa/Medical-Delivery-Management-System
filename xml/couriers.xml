@@ -4,7 +4,7 @@
     <Id>1</Id>
     <FullName>israel israeli</FullName>
     <Password>1234</Password>
-    <Phone>0501234567</Phone>
+    <Phone>0501234568</Phone>
     <Email>courier1@mail.com</Email>
     <Signature />
     <MaxPersonalDeliveryDistance>20</MaxPersonalDeliveryDistance>
@@ -55,7 +55,7 @@
     <Phone>0534449988</Phone>
     <Email>omer.bd@mail.com</Email>
     <Signature />
-    <MaxPersonalDeliveryDistance>40</MaxPersonalDeliveryDistance>
+    <MaxPersonalDeliveryDistance>30</MaxPersonalDeliveryDistance>
     <Type>Bicycle</Type>
     <IsActive>true</IsActive>
     <StartWorkDate>2022-06-20T00:00:00</StartWorkDate>
@@ -71,18 +71,6 @@
     <Type>Bicycle</Type>
     <IsActive>true</IsActive>
     <StartWorkDate>2024-01-01T00:00:00</StartWorkDate>
-  </Courier>
-  <Courier>
-    <Id>0</Id>
-    <FullName>yam refaeli</FullName>
-    <Password />
-    <Phone>0583736256</Phone>
-    <Email>yami@gmail.com</Email>
-    <Signature />
-    <MaxPersonalDeliveryDistance>50</MaxPersonalDeliveryDistance>
-    <Type>Car</Type>
-    <IsActive>false</IsActive>
-    <StartWorkDate xsi:nil="true" />
   </Courier>
   <Courier>
     <Id>213452627</Id>
@@ -102,6 +90,7 @@
     <Password />
     <Phone>0546737873</Phone>
     <Email>y1@gmail.com</Email>
+    <Signature />
     <MaxPersonalDeliveryDistance>20</MaxPersonalDeliveryDistance>
     <Type>Motorcycle</Type>
     <IsActive>false</IsActive>

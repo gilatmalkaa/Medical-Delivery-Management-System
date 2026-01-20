@@ -2,6 +2,7 @@
 using DalApi;
 using DO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// In-memory implementation of the <see cref="IDelivery"/> interface.
@@ -16,6 +17,8 @@ internal class DeliveryImplementation : IDelivery
     /// Throws <see cref="DalAlreadyExistsException"/> if a delivery with the same ID already exists.
     /// </summary>
     /// <param name="item">The delivery to create.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Create(Delivery item)
     {
         if (item.Id == 0)
@@ -38,6 +41,8 @@ internal class DeliveryImplementation : IDelivery
     /// </summary>
     /// <param name="id">The ID of the delivery to read.</param>
     /// <returns>The delivery with the specified ID, or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Delivery? Read(int id)
     {
         return DataSource.Deliveries.FirstOrDefault(d => d.Id == id);
@@ -49,6 +54,9 @@ internal class DeliveryImplementation : IDelivery
     /// </summary>
     /// <param name="filter">Optional filter function.</param>
     /// <returns>An enumerable of deliveries matching the filter or all deliveries.</returns>
+    /// 
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public IEnumerable<Delivery> ReadAll(Func<Delivery, bool>? filter = null)
         => filter == null
             ? DataSource.Deliveries.Select(item => item)
@@ -59,6 +67,8 @@ internal class DeliveryImplementation : IDelivery
     /// Throws <see cref="DalDoesNotExistException"/> if the delivery does not exist.
     /// </summary>
     /// <param name="item">The delivery with updated information.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Update(Delivery item)
     {
         Delivery? existing = Read(item.Id);
@@ -74,6 +84,8 @@ internal class DeliveryImplementation : IDelivery
     /// Throws <see cref="DalDoesNotExistException"/> if the delivery does not exist.
     /// </summary>
     /// <param name="id">The ID of the delivery to delete.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
         Delivery? delivery = Read(id);
@@ -87,6 +99,8 @@ internal class DeliveryImplementation : IDelivery
     /// Deletes all deliveries from the data source.
     /// Useful for resetting the delivery data during testing or initialization.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void DeleteAll()
     {
         DataSource.Deliveries.Clear();
@@ -99,6 +113,9 @@ internal class DeliveryImplementation : IDelivery
     /// </summary>
     /// <param name="filter">Predicate to filter deliveries.</param>
     /// <returns>The first matching delivery or null if none match.</returns>
+    /// 
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
     Delivery? ICrud<Delivery>.Read(Func<Delivery, bool> filter)
     {
         return DataSource.Deliveries.FirstOrDefault(filter);

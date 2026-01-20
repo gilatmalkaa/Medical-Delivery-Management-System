@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Helpers;
 
@@ -56,6 +58,7 @@ internal static class Tools
             return (0, 0);
 
         int hash = address.GetHashCode();
+
         return (
             31.0 + (hash % 1000) * 0.0001,
             35.0 + (hash % 1000) * 0.0001
@@ -63,12 +66,27 @@ internal static class Tools
     }
 
     /// <summary>
+    /// Asynchronously generates deterministic pseudo-coordinates
+    /// for a given address string.
+    /// </summary>
+    internal static Task<(double Latitude, double Longitude)> GetCoordinatesAsync(
+        string address)
+    {
+        return Task.Run(() => GetCoordinates(address));
+    }
+
+    /// <summary>
     /// Calculates the aerial distance between two geographic coordinates
     /// using the Haversine formula.
     /// </summary>
-    internal static double CalcAirDistance(double lat1, double lon1, double lat2, double lon2)
+    internal static double CalcAirDistance(
+        double lat1,
+        double lon1,
+        double lat2,
+        double lon2)
     {
         double R = 6371;
+
         double dLat = DegreesToRadians(lat2 - lat1);
         double dLon = DegreesToRadians(lon2 - lon1);
 
@@ -85,7 +103,8 @@ internal static class Tools
     /// <summary>
     /// Converts an angle value from degrees to radians.
     /// </summary>
-    private static double DegreesToRadians(double deg) => deg * Math.PI / 180;
+    private static double DegreesToRadians(double deg) =>
+        deg * Math.PI / 180;
 
     /// <summary>
     /// Calculates the expected delivery completion time based on
@@ -146,8 +165,10 @@ internal static class Tools
                 return BO.ScheduleStatus.Late;
 
             TimeSpan diff = deliveredAt.Value - maxDeliveryTime.Value;
+
             if (diff <= TimeSpan.Zero)
                 return BO.ScheduleStatus.OnTime;
+
             if (diff <= TimeSpan.FromMinutes(10))
                 return BO.ScheduleStatus.SlightDelay;
 
@@ -157,6 +178,31 @@ internal static class Tools
         return DateTime.Now <= maxDeliveryTime
             ? BO.ScheduleStatus.Scheduled
             : BO.ScheduleStatus.Late;
+    }
+
+    private static readonly ConcurrentDictionary<string, (double Lat, double Lon)>
+        _coordinatesCache = new();
+
+    public static async Task<(double Latitude, double Longitude)>
+        GetCoordinatesCachedAsync(string address)
+    {
+        if (string.IsNullOrWhiteSpace(address))
+            return (0, 0);
+
+        if (_coordinatesCache.TryGetValue(address, out var cached))
+            return cached;
+
+        try
+        {
+            var coords = await GetCoordinatesAsync(address);
+
+            _coordinatesCache[address] = coords;
+            return coords;
+        }
+        catch
+        {
+            return (0, 0);
+        }
     }
 
     /// <summary>

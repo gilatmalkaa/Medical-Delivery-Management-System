@@ -2,6 +2,7 @@
 using DalApi;
 using DO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// In-memory implementation of the <see cref="IOrder"/> interface.
@@ -16,6 +17,8 @@ internal class OrderImplementation : IOrder
     /// Throws <see cref="DalAlreadyExistsException"/> if an order with the same ID already exists.
     /// </summary>
     /// <param name="item">The order to create.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Create(Order item)
     {
         if (item.Id == 0)
@@ -38,6 +41,8 @@ internal class OrderImplementation : IOrder
     /// </summary>
     /// <param name="id">The ID of the order to read.</param>
     /// <returns>The order with the specified ID, or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Order? Read(int id)
     {
         return DataSource.Orders.FirstOrDefault(o => o.Id == id);
@@ -49,6 +54,8 @@ internal class OrderImplementation : IOrder
     /// </summary>
     /// <param name="filter">Optional filter function.</param>
     /// <returns>An enumerable of orders matching the filter or all orders.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public IEnumerable<Order> ReadAll(Func<Order, bool>? filter = null)
         => filter == null
             ? DataSource.Orders.Select(item => item)
@@ -59,6 +66,8 @@ internal class OrderImplementation : IOrder
     /// Throws <see cref="DalDoesNotExistException"/> if the order does not exist.
     /// </summary>
     /// <param name="item">The order with updated information.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Update(Order item)
     {
         Order? existing = Read(item.Id);
@@ -74,6 +83,8 @@ internal class OrderImplementation : IOrder
     /// Throws <see cref="DalDoesNotExistException"/> if the order does not exist.
     /// </summary>
     /// <param name="id">The ID of the order to delete.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
         Order? order = Read(id);
@@ -87,6 +98,8 @@ internal class OrderImplementation : IOrder
     /// Deletes all orders from the data source.
     /// Useful for resetting the order data during testing or initialization.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void DeleteAll()
     {
         DataSource.Orders.Clear();

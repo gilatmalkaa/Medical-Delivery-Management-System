@@ -2,6 +2,7 @@
 using DalApi;
 using DO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// Provides an in-memory implementation for managing courier data,
@@ -14,6 +15,8 @@ internal class CourierImplementation : ICourier
     /// Generates a new identifier if the provided ID is zero,
     /// and throws an exception if a courier with the same ID already exists.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Create(Courier item)
     {
         if (item.Id == 0)
@@ -34,6 +37,8 @@ internal class CourierImplementation : ICourier
     /// Retrieves a courier by its unique identifier.
     /// Returns null if no matching courier is found.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Courier? Read(int id)
     {
         return DataSource.Couriers.FirstOrDefault(c => c.Id == id);
@@ -42,6 +47,8 @@ internal class CourierImplementation : ICourier
     /// <summary>
     /// Retrieves all couriers, optionally filtered by a predicate.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public IEnumerable<Courier> ReadAll(Func<Courier, bool>? filter = null)
         => filter == null
             ? DataSource.Couriers.Select(item => item)
@@ -51,6 +58,8 @@ internal class CourierImplementation : ICourier
     /// Updates an existing courier.
     /// Throws an exception if the courier does not exist.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Update(Courier item)
     {
         Courier? existing = Read(item.Id);
@@ -65,6 +74,8 @@ internal class CourierImplementation : ICourier
     /// Deletes a courier by its unique identifier.
     /// Throws an exception if the courier does not exist.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
         Courier? courier = Read(id);
@@ -77,6 +88,8 @@ internal class CourierImplementation : ICourier
     /// <summary>
     /// Deletes all courier entities from the data source.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void DeleteAll()
     {
         DataSource.Couriers.Clear();

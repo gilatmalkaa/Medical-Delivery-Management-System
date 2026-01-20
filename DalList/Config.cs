@@ -7,7 +7,16 @@
 /// </summary>
 internal static class Config
 {
+    /// <summary>
+    /// Administrator identifier used for authentication
+    /// and privileged system operations.
+    /// </summary>
     public static string AdminId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Administrator password used for authentication
+    /// and access to management-level features.
+    /// </summary>
     public static string AdminPassword { get; set; } = string.Empty;
     /// <summary>
     /// Starting ID number for orders.

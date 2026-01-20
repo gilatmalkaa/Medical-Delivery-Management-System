@@ -52,7 +52,10 @@ internal class DeliveryImplementation : IDelivery
     /// <param name="orderId">Order identifier.</param>
     /// <param name="courierId">Courier identifier.</param>
     public void Create(int orderId, int courierId)
-        => DeliveryManager.Create(orderId, courierId);
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        DeliveryManager.Create(orderId, courierId);
+    }
 
     /// <summary>
     /// Updates the status of an existing delivery.
@@ -60,7 +63,10 @@ internal class DeliveryImplementation : IDelivery
     /// <param name="deliveryId">Delivery identifier.</param>
     /// <param name="status">New delivery status.</param>
     public void UpdateStatus(int deliveryId, DeliveryStatus status)
-        => DeliveryManager.UpdateStatus(deliveryId, status);
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        DeliveryManager.UpdateStatus(deliveryId, status);
+    }
 
     // ===== Stage 5 Observer Support =====
 

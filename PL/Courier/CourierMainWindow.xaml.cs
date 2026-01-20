@@ -1,89 +1,124 @@
 ﻿using BlApi;
 using BO;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace PL.Courier
 {
     /// <summary>
-    /// Provides the main operational window for a courier,
-    /// enabling delivery completion, order selection,
-    /// profile updates, and delivery history viewing.
+    /// Main operational window for a courier.
+    /// Allows managing the current delivery,
+    /// choosing new orders, updating personal details,
+    /// and viewing delivery history.
     /// </summary>
     public partial class CourierMainWindow : Window
     {
-        static readonly IBl s_bl = Factory.Get();
+        /// <summary>
+        /// Business layer access.
+        /// </summary>
+        private static readonly IBl s_bl = Factory.Get();
 
         /// <summary>
-        /// Gets the courier currently logged into the system.
+        /// The courier currently logged into the system.
         /// </summary>
         public BO.Courier Courier { get; private set; }
 
         /// <summary>
-        /// Indicates whether the courier is eligible to choose a new order.
+        /// Indicates whether the courier is allowed to choose a new order.
+        /// A courier can choose an order only if active and not currently delivering.
         /// </summary>
         public bool CanChooseOrder =>
-            Courier.IsActive && Courier.CurrentOrder == null;
+            Courier != null && Courier.IsActive && Courier.CurrentOrder == null;
 
         /// <summary>
         /// Indicates whether the courier can complete the current delivery.
         /// </summary>
         public bool CanFinishDelivery =>
-            Courier != null &&
-            Courier.CurrentOrder != null;
+            Courier?.CurrentOrder != null;
 
         /// <summary>
-        /// Initializes the main courier window for the specified courier.
+        /// The identifier of the courier displayed in this window.
         /// </summary>
+        private readonly int _courierId;
+
+        /// <summary>
+        /// Constructs the courier main window for a specific courier.
+        /// </summary>
+        /// <param name="courierId">Courier identifier.</param>
         public CourierMainWindow(int courierId)
         {
-            Courier = s_bl.Couriers.Get(courierId);
             InitializeComponent();
-            DataContext = this;
+            _courierId = courierId;
+
+            // Load courier data asynchronously once the window is ready
+            Loaded += CourierMainWindow_Loaded;
+        }
+
+        /// <summary>
+        /// Handles the Loaded event of the window.
+        /// Loads the courier data asynchronously and binds it to the UI.
+        /// </summary>
+        private async void CourierMainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await RefreshCourierAsync();
+        }
+
+        /// <summary>
+        /// Reloads the courier data from the business layer asynchronously
+        /// and refreshes the UI bindings.
+        /// </summary>
+        private async Task RefreshCourierAsync()
+        {
+            // Fetch courier data from BL on a background thread
+            Courier = await Task.Run(() =>
+                s_bl.Couriers.Get(_courierId));
+
+            // Update UI bindings on the UI thread
+            Dispatcher.Invoke(() =>
+            {
+                DataContext = null;
+                DataContext = this;
+            });
         }
 
         /// <summary>
         /// Completes the current delivery assigned to the courier.
         /// </summary>
-        private void BtnFinishDelivery_Click(object sender, RoutedEventArgs e)
+        private async void BtnFinishDelivery_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                s_bl.Couriers.CompleteDelivery(Courier.Id);
-                RefreshCourier();
+                // Complete delivery through BL (background thread)
+                await Task.Run(() =>
+                    s_bl.Couriers.CompleteDelivery(Courier.Id));
+
+                // Refresh courier data after completion
+                await RefreshCourierAsync();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Cannot finish delivery");
+                MessageBox.Show(
+                    ex.Message,
+                    "Cannot finish delivery",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
         /// <summary>
-        /// Refreshes the courier data from the business layer.
+        /// Opens the courier update window and refreshes
+        /// the courier data after closing it.
         /// </summary>
-        private void RefreshCourier()
+        private async void BtnUpdateCourierDetails_Click(object sender, RoutedEventArgs e)
         {
-            Courier = s_bl.Couriers.Get(Courier.Id);
-            DataContext = null;
-            DataContext = this;
-        }
+            var updateWindow =
+                new CourierAddUpdateWindow(Courier.Id);
 
-        /// <summary>
-        /// Opens the courier update window and refreshes the data after closing.
-        /// </summary>
-        private void BtnUpdateCourierDetails_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var updateWindow = new CourierAddUpdateWindow(Courier.Id);
-                updateWindow.ShowDialog();
+            updateWindow.ShowDialog();
 
-                RefreshCourier();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Update Courier Failed");
-            }
+            // Reload courier data after update
+            await RefreshCourierAsync();
         }
 
         /// <summary>
@@ -91,27 +126,21 @@ namespace PL.Courier
         /// </summary>
         private void BtnDeliveryHistory_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var historyWindow =
-                    new CourierDeliveryHistoryWindow(Courier.Id);
-
-                historyWindow.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Cannot open delivery history");
-            }
+            new CourierDeliveryHistoryWindow(Courier.Id)
+                .ShowDialog();
         }
 
         /// <summary>
-        /// Allows the courier to choose a new order if available.
+        /// Allows the courier to choose a new order,
+        /// if the courier is currently available.
         /// </summary>
-        private void BtnChooseOrder_Click(object sender, RoutedEventArgs e)
+        private async void BtnChooseOrder_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var courier = s_bl.Couriers.Get(Courier.Id);
+                // Validate availability using fresh data from BL
+                var courier = await Task.Run(() =>
+                    s_bl.Couriers.Get(Courier.Id));
 
                 if (!courier.IsAvailable)
                 {
@@ -123,11 +152,20 @@ namespace PL.Courier
                     return;
                 }
 
-                new ChooseOrderWindow(Courier.Id).ShowDialog();
+                // Open order selection window
+                new ChooseOrderWindow(Courier.Id)
+                    .ShowDialog();
+
+                // Refresh courier data after choosing an order
+                await RefreshCourierAsync();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(
+                    ex.Message,
+                    "Choose order failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
     }

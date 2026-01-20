@@ -7,7 +7,7 @@ using BlImplementation;
 /// </summary>
 public static class Factory
 {
-    /// <summary
+    /// <summary>
     /// Creates and returns an instance of the BL implementation.
     /// </summary>
     public static IBl Get() => new BlImplementation.Bl();

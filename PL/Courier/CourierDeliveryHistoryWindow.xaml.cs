@@ -11,7 +11,10 @@ namespace PL.Courier
     /// </summary>
     public partial class CourierDeliveryHistoryWindow : Window
     {
-        static readonly IBl s_bl = Factory.Get();
+        /// <summary>
+        /// Business logic facade used for courier operations.
+        /// </summary>
+        private static readonly IBl s_bl = Factory.Get();
 
         /// <summary>
         /// Gets the list of closed deliveries associated with the courier.

@@ -21,24 +21,40 @@ internal class OrderImplementation : IOrder
     /// Creates a new order in the system.
     /// </summary>
     /// <param name="order">Order object to create.</param>
-    public void Create(BO.Order order) => OrderManager.Create(order);
+    public void Create(BO.Order order)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        OrderManager.Create(order);
+    }
 
     /// <summary>
     /// Updates an existing order with new details.
     /// </summary>
     /// <param name="order">Order object containing updated data.</param>
-    public void Update(BO.Order order) => OrderManager.Update(order);
+    public void Update(BO.Order order)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        OrderManager.Update(order);
+    }
 
     /// <summary>
     /// Deletes an order by its identifier.
     /// </summary>
     /// <param name="id">Order identifier.</param>
-    public void Delete(int id) => OrderManager.Delete(id);
+    public void Delete(int id)
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        OrderManager.Delete(id);
+    }
 
     /// <summary>
     /// Deletes all orders from the system.
     /// </summary>
-    public void DeleteAll() => OrderManager.DeleteAll();
+    public void DeleteAll()
+    {
+        AdminManager.ThrowOnSimulatorIsRunning();
+        OrderManager.DeleteAll();
+    }
 
     /// <summary>
     /// Retrieves all orders, optionally filtered
@@ -55,7 +71,11 @@ internal class OrderImplementation : IOrder
     /// <param name="filter">Filter condition.</param>
     /// <returns>The first matching order.</returns>
     public BO.Order Read(Func<BO.Order, bool> filter)
-        => OrderManager.Read(filter);
+        => OrderManager
+            .ReadAll(filter)
+            .FirstOrDefault()
+            ?? throw new BO.BlDoesNotExistException("Order not found");
+
 
     /// <summary>
     /// Retrieves a summarized list of all orders
@@ -106,6 +126,7 @@ internal class OrderImplementation : IOrder
     /// </summary>
     BO.Order IOrder.Create(BO.Order order)
     {
+        AdminManager.ThrowOnSimulatorIsRunning();
         OrderManager.Create(order);
         return order;
     }
@@ -114,8 +135,10 @@ internal class OrderImplementation : IOrder
     /// Explicit interface implementation for order update.
     /// Returns the updated order instance.
     /// </summary>
+
     BO.Order IOrder.Update(BO.Order order)
     {
+        AdminManager.ThrowOnSimulatorIsRunning();
         OrderManager.Update(order);
         return OrderManager.Get(order.Id);
     }
@@ -126,6 +149,7 @@ internal class OrderImplementation : IOrder
     /// <param name="orderId">Order identifier.</param>
     public void Cancel(int orderId)
     {
+        AdminManager.ThrowOnSimulatorIsRunning();
         OrderManager.Cancel(orderId);
     }
 

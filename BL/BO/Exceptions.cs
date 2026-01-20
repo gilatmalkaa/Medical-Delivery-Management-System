@@ -116,3 +116,20 @@ public class BlInvalidCredentialsException : Exception
     {
     }
 }
+
+/// <summary>
+/// Exception thrown when an operation is attempted
+/// while the system simulator is running.
+/// </summary>
+[Serializable]
+public class BLTemporaryNotAvailableException : Exception
+{
+    /// <summary>
+    /// Creates the exception with a descriptive message.
+    /// </summary>
+    public BLTemporaryNotAvailableException(string message)
+        : base(message)
+    {
+    }
+}
+

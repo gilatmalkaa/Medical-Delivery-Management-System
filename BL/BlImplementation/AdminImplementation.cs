@@ -88,10 +88,7 @@ internal class AdminImplementation : IAdmin
     /// A dictionary mapping each order status to the
     /// number of orders in that status.
     /// </returns>
-    public IDictionary<OrderStatus, int> GetOrdersCountByStatus()
-    {
-        return AdminManager.GetOrdersCountByStatus();
-    }
+    public IDictionary<OrderStatus, int> OrdersCountByStatus => AdminManager.GetOrdersCountByStatus();
 
     /// <summary>
     /// Authenticates a user and returns the corresponding system role.
@@ -110,4 +107,32 @@ internal class AdminImplementation : IAdmin
     #endregion
 
     #endregion
+    /// <summary>
+    /// Starts the simulator if it is not already running.
+    /// </summary>
+    /// <param name="interval">Clock advance interval in minutes.</param>
+    public void StartSimulator(int interval) 
+    {
+        AdminManager.ThrowOnSimulatorIsRunning(); 
+        AdminManager.Start(interval);             
+    }
+
+    /// <summary>
+    /// Stops the simulator.
+    /// </summary>
+    public void StopSimulator()
+    {
+        AdminManager.Stop();
+    }
+
+    /// <summary>
+    /// Gets order counts grouped by ScheduleStatus
+    /// (OnTime / AtRisk / Late).
+    /// </summary>
+    public IDictionary<ScheduleStatus, int>
+        GetOrdersCountByScheduleStatus()
+    {
+        return Helpers.AdminManager.GetOrdersCountByScheduleStatus();
+    }
+
 }

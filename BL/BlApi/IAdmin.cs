@@ -39,7 +39,10 @@ public interface IAdmin
     /// </summary>
     void ResetDB();
 
-    IDictionary<OrderStatus, int> GetOrdersCountByStatus();
+    /// <summary>
+    /// Returns number of orders per delivery OrdersCountByStatus.
+    /// </summary>
+    IDictionary<OrderStatus, int> OrdersCountByStatus { get; }
 
     #region Stage 5  
 
@@ -64,6 +67,11 @@ public interface IAdmin
     void RemoveClockObserver(Action clockObserver);
 
     #endregion
+    /// <summary>
+    /// Returns number of orders per delivery schedule status.
+    /// </summary>
+    IDictionary<ScheduleStatus, int>
+        GetOrdersCountByScheduleStatus();
 
     /// <summary>
     /// Authenticates a user based on ID and password
@@ -73,5 +81,16 @@ public interface IAdmin
     /// <param name="password">User password.</param>
     /// <returns>The role assigned to the authenticated user.</returns>
     UserRole Login(string id, string password);
+
+    /// <summary>
+    /// Starts the system simulator with the given interval.
+    /// </summary>
+    /// <param name="interval">Clock advance interval in minutes.</param>
+    void StartSimulator(int interval); // stage 7
+
+    /// <summary>
+    /// Stops the system simulator.
+    /// </summary>
+    void StopSimulator(); // stage 7
 
 }

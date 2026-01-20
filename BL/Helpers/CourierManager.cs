@@ -13,8 +13,27 @@ namespace Helpers;
 /// </summary>
 internal static class CourierManager
 {
+    /// <summary>
+    /// Observer manager for courier-related updates.
+    /// Notifies subscribed UI components about changes.
+    /// </summary>
     internal static ObserverManager Observers = new();
 
+    /// <summary>
+    /// Mutex used to prevent overlapping periodic courier updates.
+    /// </summary>
+    private static readonly AsyncMutex s_periodicMutex = new(); // stage 7
+
+    /// <summary>
+    /// Mutex used to ensure single execution of courier simulation logic.
+    /// </summary>
+    private static readonly AsyncMutex s_simulationMutex = new(); // stage 7
+
+
+    /// <summary>
+    /// Data access layer instance used by the order manager
+    /// to perform CRUD operations on orders and deliveries.
+    /// </summary>
     private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
     /// <summary>
@@ -23,30 +42,35 @@ internal static class CourierManager
     /// <param name="courier">Courier business object.</param>
     internal static void Create(BO.Courier courier)
     {
-        int newId =
-            s_dal.Courier.ReadAll().Any()
-                ? s_dal.Courier.ReadAll().Max(c => c.Id) + 1
-                : 1;
+        int newId;
 
-        DO.Courier newDo = new()
+        lock (AdminManager.BlMutex)
         {
-            Id = newId,
-            FullName = courier.Name ?? "",
-            Password = courier.Password ?? "",
-            Phone = courier.Phone,
-            Email = courier.Email,
-            Signature = courier.Signature,
-            MaxPersonalDeliveryDistance = courier.MaxPersonalDeliveryDistance ?? 0,
-            Type = (DO.CourierType)courier.Type,
-            IsActive = courier.IsActive,
-            StartWorkDate = courier.StartWorkDate == default
-                ? DateTime.Now
-                : courier.StartWorkDate
-        };
+            newId =
+                s_dal.Courier.ReadAll().Any()
+                    ? s_dal.Courier.ReadAll().Max(c => c.Id) + 1
+                    : 1;
 
-        s_dal.Courier.Create(newDo);
-        Observers.NotifyListUpdated();
+            DO.Courier newDo = new()
+            {
+                Id = newId,
+                FullName = courier.Name ?? "",
+                Password = courier.Password ?? "",
+                Phone = courier.Phone,
+                Email = courier.Email,
+                Signature = courier.Signature,
+                MaxPersonalDeliveryDistance = courier.MaxPersonalDeliveryDistance ?? 0,
+                Type = (DO.CourierType)courier.Type,
+                IsActive = courier.IsActive,
+                StartWorkDate = AdminManager.Now
+            };
+
+            s_dal.Courier.Create(newDo);
+        }
+
+        Observers.NotifyListUpdated(); 
     }
+
 
 
     /// <summary>
@@ -103,7 +127,7 @@ internal static class CourierManager
                     activeDelivery.StartDeliveryDate + expectedDuration;
 
                 TimeSpan remaining =
-                    expectedDeliveryTime - DateTime.Now;
+                    expectedDeliveryTime - AdminManager.Now;
 
                 currentOrder = new BO.OrderInProgress
                 {
@@ -116,7 +140,7 @@ internal static class CourierManager
                     ActualDistance = activeDelivery.ActualDistance,
                     CustomerName = order.CustomerName,
                     CustomerPhone = order.CustomerPhone,
-                    OpenDate = order.OpenDate ?? DateTime.Now,
+                    OpenDate = order.OpenDate ?? AdminManager.Now,
                     StartDeliveryDate = activeDelivery.StartDeliveryDate,
                     ExpectedArrivalTime = expectedDeliveryTime,
                     LatestSupplyTime = expectedDeliveryTime,
@@ -172,43 +196,43 @@ internal static class CourierManager
     /// </summary>
     internal static void Update(BO.Courier courier)
     {
-        DO.Courier? c = s_dal.Courier.Read(courier.Id);
-        if (c == null)
-            throw new BO.BlDoesNotExistException($"Courier with ID={courier.Id} not found");
+        DO.Courier updated;
 
-        if (courier.MaxPersonalDeliveryDistance != c.MaxPersonalDeliveryDistance &&
-            courier.MaxPersonalDeliveryDistance > s_dal.Config.MaxRange)
+        lock (AdminManager.BlMutex) 
         {
-            throw new BO.BlInvalidInputException(
-                "Personal delivery distance exceeds company limit");
+            DO.Courier? c = s_dal.Courier.Read(courier.Id);
+            if (c == null)
+                throw new BO.BlDoesNotExistException($"Courier with ID={courier.Id} not found");
+
+            bool hasActiveDelivery =
+                s_dal.Delivery.ReadAll(d =>
+                    d.CourierId == courier.Id &&
+                    d.CompletionStatus == DO.DeliveryStatus.InProgress).Any();
+
+            if (hasActiveDelivery && c.Type != (DO.CourierType)courier.Type)
+                throw new BO.BlInvalidOperationException(
+                    "Cannot change courier type while delivery is in progress");
+
+            updated = c with
+            {
+                FullName = courier.Name ?? "",
+                Password = courier.Password,
+                Phone = courier.Phone,
+                Email = courier.Email,
+                Signature = courier.Signature,
+                MaxPersonalDeliveryDistance = courier.MaxPersonalDeliveryDistance ?? 0,
+                Type = (DO.CourierType)courier.Type,
+                IsActive = courier.IsActive,
+                StartWorkDate = courier.StartWorkDate
+            };
+
+            s_dal.Courier.Update(updated);
         }
 
-        bool hasActiveDelivery =
-            s_dal.Delivery.ReadAll(d =>
-                d.CourierId == courier.Id &&
-                d.CompletionStatus == DO.DeliveryStatus.InProgress).Any();
-
-        if (hasActiveDelivery && c.Type != (DO.CourierType)courier.Type)
-            throw new BO.BlInvalidOperationException(
-                "Cannot change courier type while delivery is in progress");
-
-        DO.Courier updated = c with
-        {
-            FullName = courier.Name ?? "",
-            Password = courier.Password,
-            Phone = courier.Phone,
-            Email = courier.Email,
-            Signature = courier.Signature,
-            MaxPersonalDeliveryDistance = courier.MaxPersonalDeliveryDistance ?? 0,
-            Type = (DO.CourierType)courier.Type,
-            IsActive = courier.IsActive,
-            StartWorkDate = courier.StartWorkDate
-        };
-
-        s_dal.Courier.Update(updated);
         Observers.NotifyItemUpdated(courier.Id);
         Observers.NotifyListUpdated();
     }
+
 
     /// <summary>
     /// Retrieves lightweight courier summaries for list displays.
@@ -241,48 +265,71 @@ internal static class CourierManager
     /// </summary>
     internal static void Delete(int id)
     {
-        if (s_dal.Delivery.ReadAll(d => d.CourierId == id).Any())
-            throw new BO.BlPermissionException(
-                "Cannot delete courier with deliveries");
+        lock (AdminManager.BlMutex)
+        {
+            if (s_dal.Delivery.ReadAll(d => d.CourierId == id).Any())
+                throw new BO.BlPermissionException(
+                    "Cannot delete courier with deliveries");
 
-        s_dal.Courier.Delete(id);
+            s_dal.Courier.Delete(id);
+        }
+
         Observers.NotifyItemUpdated(id);
         Observers.NotifyListUpdated();
     }
+
 
     /// <summary>
     /// Deletes all couriers from the system.
     /// </summary>
     internal static void DeleteAll()
     {
-        s_dal.Courier.DeleteAll();
+        lock (AdminManager.BlMutex)
+        {
+            s_dal.Courier.DeleteAll();
+        }
+
         Observers.NotifyListUpdated();
     }
+
 
     /// <summary>
     /// Retrieves open orders that a courier can accept.
     /// </summary>
-    internal static IEnumerable<BO.OpenOrderInList> GetOpenOrdersForCourier(int courierId)
+    internal static async Task<IEnumerable<BO.OpenOrderInList>>
+     GetOpenOrdersForCourierAsync(int courierId)
     {
         var courier = Get(courierId);
-        var hubCoords = Tools.GetCoordinates("Main Logistics Center");
+        var hubCoords =
+            await Tools.GetCoordinatesCachedAsync("Main Logistics Center");
 
-        return
-            from order in s_dal.Order.ReadAll()
-            where order.Status == DO.OrderStatus.Created
-            where !s_dal.Delivery.ReadAll().Any(d => d.OrderId == order.Id)
-            let orderCoords = Tools.GetCoordinates(order.Address)
-            let airDistance =
+        var result = new List<BO.OpenOrderInList>();
+
+        foreach (var order in s_dal.Order.ReadAll())
+        {
+            if (order.Status != DO.OrderStatus.Created)
+                continue;
+
+            if (s_dal.Delivery.ReadAll().Any(d => d.OrderId == order.Id))
+                continue;
+
+            var orderCoords =
+                await Tools.GetCoordinatesCachedAsync(order.Address);
+
+            double airDistance =
                 (orderCoords.Latitude == 0 && orderCoords.Longitude == 0)
                     ? 0
                     : Tools.CalcAirDistance(
                         hubCoords.Latitude,
                         hubCoords.Longitude,
                         orderCoords.Latitude,
-                        orderCoords.Longitude)
-            where courier.MaxPersonalDeliveryDistance == null
-               || airDistance <= courier.MaxPersonalDeliveryDistance.Value
-            select new BO.OpenOrderInList
+                        orderCoords.Longitude);
+
+            if (courier.MaxPersonalDeliveryDistance != null &&
+                airDistance > courier.MaxPersonalDeliveryDistance.Value)
+                continue;
+
+            result.Add(new BO.OpenOrderInList
             {
                 CourierId = null,
                 OrderId = order.Id,
@@ -293,61 +340,175 @@ internal static class CourierManager
                 ScheduleStatus = BO.ScheduleStatus.Scheduled,
                 RemainingTime = TimeSpan.Zero,
                 EndTime = DateTime.MinValue
-            };
+            });
+        }
+
+        return result;
     }
+
 
     /// <summary>
     /// Assigns an open order to a courier.
     /// </summary>
     internal static void AssignOrder(int courierId, int orderId)
     {
-        var courier = Get(courierId);
-        if (!courier.IsAvailable)
-            throw new InvalidOperationException("Courier is not available");
-
-        var order = s_dal.Order.Read(orderId)
-            ?? throw new InvalidOperationException("Order does not exist");
-
-        if (order.Status != DO.OrderStatus.Created)
-            throw new InvalidOperationException("Order is not open");
-
-        int newDeliveryId =
-            s_dal.Delivery.ReadAll().Any()
-                ? s_dal.Delivery.ReadAll().Max(d => d.Id) + 1
-                : 1;
-
-        s_dal.Delivery.Create(new DO.Delivery
+        lock (AdminManager.BlMutex) 
         {
-            Id = newDeliveryId,
-            OrderId = orderId,
-            CourierId = courierId,
-            StartDeliveryDate = DateTime.Now,
-            CompletionStatus = DO.DeliveryStatus.InProgress
-        });
+            var courier = Get(courierId);
+            if (!courier.IsAvailable)
+                throw new InvalidOperationException("Courier is not available");
 
-        s_dal.Order.Update(order with { Status = DO.OrderStatus.InDelivery });
+            var order = s_dal.Order.Read(orderId)
+                ?? throw new InvalidOperationException("Order does not exist");
+
+            if (order.Status != DO.OrderStatus.Created)
+                throw new InvalidOperationException("Order is not open");
+
+            int newDeliveryId =
+                s_dal.Delivery.ReadAll().Any()
+                    ? s_dal.Delivery.ReadAll().Max(d => d.Id) + 1
+                    : 1;
+
+            s_dal.Delivery.Create(new DO.Delivery
+            {
+                Id = newDeliveryId,
+                OrderId = orderId,
+                CourierId = courierId,
+                StartDeliveryDate = AdminManager.Now,
+                CompletionStatus = DO.DeliveryStatus.InProgress
+            });
+
+            s_dal.Order.Update(order with { Status = DO.OrderStatus.InDelivery });
+        }
+
+        Observers.NotifyItemUpdated(courierId);
         Observers.NotifyListUpdated();
     }
+
 
     /// <summary>
     /// Completes the active delivery of a courier.
     /// </summary>
     internal static void CompleteDelivery(int courierId)
     {
-        var delivery = s_dal.Delivery.ReadAll(d =>
-            d.CourierId == courierId &&
-            d.CompletionStatus == DO.DeliveryStatus.InProgress)
-            .FirstOrDefault();
-
-        if (delivery == null)
-            throw new BO.BlInvalidOperationException("No active delivery");
-
-        s_dal.Delivery.Update(delivery with
+        lock (AdminManager.BlMutex)
         {
-            CompletionStatus = DO.DeliveryStatus.Delivered,
-            EndDeliveryDate = DateTime.Now
-        });
+            var delivery = s_dal.Delivery.ReadAll(d =>
+                d.CourierId == courierId &&
+                d.CompletionStatus == DO.DeliveryStatus.InProgress)
+                .FirstOrDefault();
 
+            if (delivery == null)
+                throw new BO.BlInvalidOperationException("No active delivery");
+
+            s_dal.Delivery.Update(delivery with
+            {
+                CompletionStatus = DO.DeliveryStatus.Delivered,
+                EndDeliveryDate = AdminManager.Now
+            });
+        }
+
+        Observers.NotifyItemUpdated(courierId);
         Observers.NotifyListUpdated();
     }
+
+
+    /// <summary>
+    /// Synchronous wrapper for async open-orders retrieval.
+    /// </summary>
+    internal static IEnumerable<BO.OpenOrderInList> GetOpenOrdersForCourier(int courierId)
+        => GetOpenOrdersForCourierAsync(courierId)
+            .GetAwaiter()
+            .GetResult();
+
+    /// <summary>
+    /// Async wrapper for Get (required by async BL workflows).
+    /// </summary>
+    internal static Task<BO.Courier> GetAsync(int id)
+        => Task.FromResult(Get(id));
+
+    /// <summary>
+    /// Performs periodic updates for couriers based on system clock changes.
+    /// Used by the simulator to randomly cancel deliveries.
+    /// </summary>
+    /// <param name="oldClock">Previous system time.</param>
+    /// <param name="newClock">Updated system time.</param>
+    internal static void PeriodicCouriersUpdates(DateTime oldClock, DateTime newClock)
+    {
+        if (s_periodicMutex.CheckAndSetInProgress())
+            return;
+
+        try
+        {
+            lock (AdminManager.BlMutex)
+            {
+                var couriers = s_dal.Courier.ReadAll().ToList();
+
+                foreach (var courier in couriers)
+                {
+                    if (!courier.IsActive)
+                        continue;
+
+                    var activeDelivery =
+                        s_dal.Delivery.ReadAll(d =>
+                            d.CourierId == courier.Id &&
+                            d.CompletionStatus == DO.DeliveryStatus.InProgress)
+                            .FirstOrDefault();
+
+                    if (activeDelivery == null)
+                        continue;
+
+                    if (Random.Shared.NextDouble() <= 0.15)
+                    {
+                        s_dal.Delivery.Update(activeDelivery with
+                        {
+                            CompletionStatus = DO.DeliveryStatus.Canceled,
+                            EndDeliveryDate = newClock
+                        });
+                    }
+                }
+            }
+        }
+        finally
+        {
+            s_periodicMutex.UnsetInProgress();
+        }
+    }
+
+    /// <summary>
+    /// Simulates courier activity as part of the system simulator.
+    /// </summary>
+    internal static async Task SimulateCouriersAsync() // stage 7
+    {
+        if (s_simulationMutex.CheckAndSetInProgress())
+            return;
+
+        try
+        {
+            await Task.Delay(500);
+
+            lock (AdminManager.BlMutex)
+            {
+                var courier =
+                    s_dal.Courier.ReadAll()
+                        .FirstOrDefault(c => c.IsActive);
+
+                if (courier != null)
+                {
+                    s_dal.Courier.Update(courier with
+                    {
+                        IsActive = courier.IsActive 
+                    });
+                }
+            }
+
+            Observers.NotifyListUpdated();
+        }
+        finally
+        {
+            s_simulationMutex.UnsetInProgress();
+        }
+    }
+
+
 }

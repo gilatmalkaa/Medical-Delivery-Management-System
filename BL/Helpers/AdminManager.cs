@@ -10,7 +10,29 @@ namespace Helpers;
 /// </summary>
 internal static class AdminManager
 {
+
+    /// <summary>
+    /// Data access layer instance used by the order manager
+    /// to perform CRUD operations on orders and deliveries.
+    /// </summary>
     private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
+    /// <summary>  
+    /// Mutex to use from BL methods to get mutual exclusion while the simulator is running 
+    /// </summary> 
+    internal static readonly object BlMutex = new();
+    /// <summary> 
+    /// The thread of the simulator 
+    /// </summary> 
+    private static volatile Thread? s_thread;
+    /// <summary> 
+    /// The Interval for clock updating 
+    /// in minutes by second (default value is 1, will be set on Start())  
+    /// </summary> 
+    private static int s_interval = 1;
+    /// <summary> 
+    /// The flag that signs whether simulator is running 
+    /// </summary> 
+    private static volatile bool s_stop = false;
 
     /// <summary>
     /// Gets the current logical system clock.
@@ -34,11 +56,30 @@ internal static class AdminManager
     /// and notifies registered observers.
     /// </summary>
     /// <param name="newClock">New clock value.</param>
-    internal static void UpdateClock(DateTime newClock)
+    internal static void UpdateClock(DateTime newClock, bool fromSimulator = false)
     {
-        s_dal.Config.Clock = newClock;
+        DateTime oldClock;
+
+        lock (BlMutex)
+        {
+            if (!fromSimulator)
+                ThrowOnSimulatorIsRunning();
+
+            oldClock = s_dal.Config.Clock;
+            s_dal.Config.Clock = newClock;
+        }
+
         ClockUpdatedObservers?.Invoke();
+
+        _ = Task.Run(() =>
+        {
+            OrderManager.PeriodicOrdersUpdates(oldClock, newClock);
+            CourierManager.PeriodicCouriersUpdates(oldClock, newClock);
+            DeliveryManager.PeriodicDeliveriesUpdates(oldClock, newClock);
+        });
     }
+
+
 
     /// <summary>
     /// Retrieves the current system configuration.
@@ -70,6 +111,8 @@ internal static class AdminManager
     [MethodImpl(MethodImplOptions.Synchronized)]
     internal static void SetConfig(Config configuration)
     {
+        ThrowOnSimulatorIsRunning();
+
         bool changed = false;
 
         if (s_dal.Config.Clock != configuration.Clock)
@@ -142,11 +185,11 @@ internal static class AdminManager
     /// </summary>
     internal static void ResetDB()
     {
+        ThrowOnSimulatorIsRunning();
         lock (BlMutex)
         {
             s_dal.ResetDB();
-            UpdateClock(Now);
-            SetConfig(GetConfig());
+            UpdateClock(s_dal.Config.Clock);
         }
     }
 
@@ -156,10 +199,10 @@ internal static class AdminManager
     /// </summary>
     internal static void InitializeDB()
     {
+        ThrowOnSimulatorIsRunning();
         lock (BlMutex)
         {
-            UpdateClock(Now);
-            SetConfig(GetConfig());
+            UpdateClock(s_dal.Config.Clock);
         }
     }
 
@@ -176,26 +219,27 @@ internal static class AdminManager
         return orders
             .Select(order =>
             {
-                var delivery = deliveries.FirstOrDefault(d => d.OrderId == order.Id);
+                var delivery = deliveries
+                    .Where(d => d.OrderId == order.Id)
+                    .OrderBy(d => d.Id)
+                    .LastOrDefault();
 
-                if (delivery == null || delivery.CompletionStatus == null)
+                if (delivery == null)
                     return OrderStatus.Created;
 
                 return delivery.CompletionStatus switch
                 {
                     DO.DeliveryStatus.InProgress => OrderStatus.InDelivery,
                     DO.DeliveryStatus.Delivered => OrderStatus.Delivered,
-                    _ => OrderStatus.Failed
+                    DO.DeliveryStatus.Canceled => OrderStatus.Failed,
+                    _ => OrderStatus.Created
                 };
             })
             .GroupBy(status => status)
             .ToDictionary(g => g.Key, g => g.Count());
     }
 
-    /// <summary>
-    /// Synchronization object for BL critical sections.
-    /// </summary>
-    internal static readonly object BlMutex = new();
+
 
     /// <summary>
     /// Authenticates a user and returns their system role.
@@ -221,4 +265,109 @@ internal static class AdminManager
 
         throw new BlInvalidCredentialsException("Invalid ID or password");
     }
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public static void ThrowOnSimulatorIsRunning()
+    {
+        if (s_thread is not null)
+            throw new BO.BLTemporaryNotAvailableException(
+                "Cannot perform the operation since Simulator is running");
+    }
+    private static void clockRunner()
+    {
+        try
+        {
+            while (!s_stop)
+            {
+                DateTime oldClock = Now;
+                DateTime newClock = Now.AddMinutes(s_interval);
+
+                UpdateClock(newClock, fromSimulator: true);
+
+                Task.Run(() =>
+                {
+                    DeliveryManager.AssignOrdersAutomatically(oldClock, newClock);
+                });
+
+                Thread.Sleep(1000);
+            }
+        }
+        catch (ThreadInterruptedException)
+        {
+            // exit gracefully
+        }
+    }
+
+    /// <summary>
+    /// Starts the simulator clock runner with the given interval.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.Synchronized)] // stage 7
+    internal static void Start(int interval)
+    {
+        if (s_thread is null)
+        {
+            s_interval = interval;
+            s_stop = false;
+
+            s_thread = new Thread(clockRunner)
+            {
+                Name = "ClockRunner"
+            };
+
+            s_thread.Start();
+        }
+    }
+
+    /// <summary>
+    /// Stops the simulator clock runner.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.Synchronized)] // stage 7
+    internal static void Stop()
+    {
+        if (s_thread is not null)
+        {
+            s_stop = true;
+            s_thread.Interrupt(); // awaken a sleeping thread
+            s_thread.Name = "ClockRunner stopped";
+            s_thread = null;
+        }
+    }
+
+    /// <summary>
+    /// Returns a summary of orders grouped by ScheduleStatus
+    /// (OnTime / AtRisk / Late).
+    /// </summary>
+    internal static IDictionary<ScheduleStatus, int>
+        GetOrdersCountByScheduleStatus()
+    {
+        var deliveries = s_dal.Delivery.ReadAll();
+
+        return deliveries
+            .Select(d => CalcScheduleStatus(d))
+            .GroupBy(status => status)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    /// <summary>
+    /// Calculates the delivery schedule status based on
+    /// actual distance vs expected distance.
+    /// </summary>
+    private static ScheduleStatus CalcScheduleStatus(DO.Delivery delivery)
+    {
+        if (delivery.ExpectedDistance is null || delivery.ExpectedDistance <= 0)
+            return ScheduleStatus.OnTime;
+
+        double ratio =
+            delivery.ActualDistance / delivery.ExpectedDistance.Value;
+
+        if (ratio <= 1.0)
+            return ScheduleStatus.OnTime;
+
+        if (ratio <= 1.2)
+            return ScheduleStatus.SlightDelay;
+
+        return ScheduleStatus.Late;
+    }
+
+
 }

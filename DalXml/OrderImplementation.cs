@@ -1,5 +1,6 @@
 ﻿using DalApi;
 using DO;
+using System.Runtime.CompilerServices;
 
 namespace Dal;
 
@@ -14,6 +15,8 @@ internal class OrderImplementation : IOrder
     /// Throws <see cref="DalAlreadyExistsException"/> if an order with the same ID already exists.
     /// </summary>
     /// <param name="item">The order to add.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Create(Order item)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -31,6 +34,8 @@ internal class OrderImplementation : IOrder
     /// </summary>
     /// <param name="id">The unique order ID.</param>
     /// <returns>The order with the specified ID or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Order? Read(int id)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -43,6 +48,8 @@ internal class OrderImplementation : IOrder
     /// </summary>
     /// <param name="filter">A predicate function to filter orders.</param>
     /// <returns>The first matching order or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Order? Read(Func<Order, bool> filter)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -55,6 +62,8 @@ internal class OrderImplementation : IOrder
     /// </summary>
     /// <param name="filter">Optional predicate to filter the orders.</param>
     /// <returns>An enumerable of orders.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public IEnumerable<Order> ReadAll(Func<Order, bool>? filter = null)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -66,6 +75,8 @@ internal class OrderImplementation : IOrder
     /// Throws <see cref="DalDoesNotExistException"/> if the order does not exist.
     /// </summary>
     /// <param name="item">The order with updated information.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Update(Order item)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -83,6 +94,8 @@ internal class OrderImplementation : IOrder
     /// Throws <see cref="DalDoesNotExistException"/> if the order does not exist.
     /// </summary>
     /// <param name="id">The unique order ID to delete.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
         List<Order> list = XMLTools.LoadListFromXMLSerializer<Order>(Config.s_orders_xml);
@@ -96,6 +109,8 @@ internal class OrderImplementation : IOrder
     /// <summary>
     /// Deletes all orders from the XML data store.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void DeleteAll()
     {
         XMLTools.SaveListToXMLSerializer(new List<Order>(), Config.s_orders_xml);

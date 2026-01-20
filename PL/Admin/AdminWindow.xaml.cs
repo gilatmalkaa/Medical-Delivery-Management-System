@@ -1,8 +1,13 @@
 ﻿using BlApi;
 using BO;
 using PL.Courier;
-using PL.Delivery;
 using PL.Order;
+using PL.Helpers;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -11,34 +16,50 @@ namespace PL.Admin
     /// <summary>
     /// Provides an administrative control panel for managing
     /// system configuration, system clock, database lifecycle,
-    /// and navigation to management screens.
+    /// simulator control, and navigation to management screens.
     /// </summary>
     public partial class AdminWindow : Window
     {
-        static readonly IBl s_bl = BlApi.Factory.Get();
-
-        private Action clockObserver;
-        private Action configObserver;
-
         /// <summary>
-        /// Gets or sets the system time displayed in the UI.
+        /// Business logic facade used by the admin window.
         /// </summary>
-        public DateTime SystemTime
-        {
-            get { return (DateTime)GetValue(SystemTimeProperty); }
-            set { SetValue(SystemTimeProperty, value); }
-        }
-
-        public static readonly DependencyProperty SystemTimeProperty =
-            DependencyProperty.Register(
-                nameof(SystemTime),
-                typeof(DateTime),
-                typeof(AdminWindow),
-                new PropertyMetadata(DateTime.Now)
-            );
+        private static readonly IBl s_bl = BlApi.Factory.Get();
 
         /// <summary>
-        /// Gets or sets the current system clock value.
+        /// Synchronization mutex for clock observer updates (Stage 7).
+        /// Prevents concurrent or overlapping UI refreshes.
+        /// </summary>
+        private readonly ObserverMutex _clockMutex = new(); // stage 7
+
+        /// <summary>
+        /// Synchronization mutex for configuration observer updates (Stage 7).
+        /// </summary>
+        private readonly ObserverMutex _configMutex = new(); // stage 7
+
+        /// <summary>
+        /// Indicates whether the simulator is currently running.
+        /// </summary>
+        private bool _isSimulatorRunning = false;
+
+        /// <summary>
+        /// Simulator tick interval in minutes.
+        /// </summary>
+        private const int SimulatorIntervalMinutes = 1;
+
+        /// <summary>
+        /// Observer callback for system clock changes.
+        /// </summary>
+        private Action _clockObserver;
+
+        /// <summary>
+        /// Observer callback for configuration changes.
+        /// </summary>
+        private Action _configObserver;
+
+        #region Dependency Properties
+
+        /// <summary>
+        /// Gets or sets the current system time displayed in the UI.
         /// </summary>
         public DateTime CurrentTime
         {
@@ -46,76 +67,186 @@ namespace PL.Admin
             set => SetValue(CurrentTimeProperty, value);
         }
 
+        /// <summary>
+        /// Dependency property backing store for CurrentTime.
+        /// </summary>
         public static readonly DependencyProperty CurrentTimeProperty =
             DependencyProperty.Register(
                 nameof(CurrentTime),
                 typeof(DateTime),
                 typeof(AdminWindow),
-                new PropertyMetadata(DateTime.Now)
-            );
+                new PropertyMetadata(DateTime.Now));
+
+        /// <summary>
+        /// Gets or sets the system configuration displayed in the admin panel.
+        /// </summary>
+        public Config Configuration
+        {
+            get => (Config)GetValue(ConfigurationProperty);
+            set => SetValue(ConfigurationProperty, value);
+        }
+
+        /// <summary>
+        /// Dependency property backing store for Configuration.
+        /// </summary>
+        public static readonly DependencyProperty ConfigurationProperty =
+            DependencyProperty.Register(
+                nameof(Configuration),
+                typeof(Config),
+                typeof(AdminWindow),
+                new PropertyMetadata(new Config()));
+
+        #endregion
+
+        #region Constructor / Lifecycle
+
+        /// <summary>
+        /// Initializes the admin window and registers observers.
+        /// </summary>
+        public AdminWindow()
+        {
+            InitializeComponent();
+
+            _clockObserver = ClockObserver;
+            _configObserver = ConfigObserver;
+
+            Loaded += AdminWindow_Loaded;
+            Closed += AdminWindow_Closed;
+        }
+
+        /// <summary>
+        /// Handles window load event.
+        /// Initializes data bindings and registers BL observers.
+        /// </summary>
+        private void AdminWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            CurrentTime = s_bl.Admin.GetClock();
+            Configuration = s_bl.Admin.GetConfig();
+
+            s_bl.Admin.AddClockObserver(_clockObserver);
+            s_bl.Admin.AddConfigObserver(_configObserver);
+
+            LoadOrdersSummary();
+            UpdateSimulatorUi();
+        }
+
+        /// <summary>
+        /// Handles window close event.
+        /// Stops simulator if running and unregisters observers.
+        /// </summary>
+        private void AdminWindow_Closed(object? sender, EventArgs e)
+        {
+            if (_isSimulatorRunning)
+            {
+                s_bl.Admin.StopSimulator();
+                _isSimulatorRunning = false;
+            }
+
+            s_bl.Admin.RemoveClockObserver(_clockObserver);
+            s_bl.Admin.RemoveConfigObserver(_configObserver);
+        }
+
+        #endregion
+
+        #region Observers
+
+        /// <summary>
+        /// Observer callback invoked when the system clock changes.
+        /// Refreshes time and order summary safely.
+        /// </summary>
+        private void ClockObserver()
+        {
+            if (_clockMutex.CheckAndSetLoadInProgressOrRestartRequired())
+                return;
+
+            Dispatcher.BeginInvoke(async () =>
+            {
+                try
+                {
+                    CurrentTime = s_bl.Admin.GetClock();
+                    LoadOrdersSummary();
+                }
+                finally
+                {
+                    if (await _clockMutex.UnsetLoadInProgressAndCheckRestartRequested())
+                        ClockObserver();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Observer callback invoked when system configuration changes.
+        /// Updates configuration binding safely.
+        /// </summary>
+        private void ConfigObserver()
+        {
+            if (_configMutex.CheckAndSetLoadInProgressOrRestartRequired())
+                return;
+
+            Dispatcher.BeginInvoke(async () =>
+            {
+                try
+                {
+                    Configuration = s_bl.Admin.GetConfig();
+                }
+                finally
+                {
+                    if (await _configMutex.UnsetLoadInProgressAndCheckRestartRequested())
+                        ConfigObserver();
+                }
+            });
+        }
+
+        #endregion
+
+        #region Clock Buttons
 
         /// <summary>
         /// Advances the system clock by one minute.
         /// </summary>
-        private void btnAddOneMinute_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime current = s_bl.Admin.GetClock();
-            DateTime updated = current.AddMinutes(1);
-
-            s_bl.Admin.UpdateClock(updated);
-            CurrentTime = updated;
-        }
+        private void btnAddOneMinute_Click(object sender, RoutedEventArgs e) =>
+            UpdateClock(t => t.AddMinutes(1));
 
         /// <summary>
         /// Advances the system clock by one hour.
         /// </summary>
-        private void btnAddOneHour_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime current = s_bl.Admin.GetClock();
-            DateTime updated = current.AddHours(1);
-
-            s_bl.Admin.UpdateClock(updated);
-            CurrentTime = updated;
-        }
+        private void btnAddOneHour_Click(object sender, RoutedEventArgs e) =>
+            UpdateClock(t => t.AddHours(1));
 
         /// <summary>
         /// Advances the system clock by one day.
         /// </summary>
-        private void btnAddOneDay_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime current = s_bl.Admin.GetClock();
-            DateTime updated = current.AddDays(1);
-
-            s_bl.Admin.UpdateClock(updated);
-            CurrentTime = updated;
-        }
+        private void btnAddOneDay_Click(object sender, RoutedEventArgs e) =>
+            UpdateClock(t => t.AddDays(1));
 
         /// <summary>
         /// Advances the system clock by one month.
         /// </summary>
-        private void btnAddOneMonth_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime current = s_bl.Admin.GetClock();
-            DateTime updated = current.AddDays(1);
-
-            s_bl.Admin.UpdateClock(updated);
-            CurrentTime = updated;
-        }
+        private void btnAddOneMonth_Click(object sender, RoutedEventArgs e) =>
+            UpdateClock(t => t.AddMonths(1));
 
         /// <summary>
         /// Advances the system clock by one year.
         /// </summary>
-        private void btnAddOneYear_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime current = s_bl.Admin.GetClock();
-            DateTime updated = current.AddDays(1);
+        private void btnAddOneYear_Click(object sender, RoutedEventArgs e) =>
+            UpdateClock(t => t.AddYears(1));
 
+        /// <summary>
+        /// Updates the system clock using the provided transformation.
+        /// </summary>
+        private void UpdateClock(Func<DateTime, DateTime> updater)
+        {
+            DateTime updated = updater(s_bl.Admin.GetClock());
             s_bl.Admin.UpdateClock(updated);
             CurrentTime = updated;
         }
 
+        #endregion
+
+        #region Config
+
         /// <summary>
-        /// Updates system configuration values.
+        /// Saves the updated configuration to the system.
         /// </summary>
         private void btnUpdateConfig_Click(object sender, RoutedEventArgs e)
         {
@@ -123,84 +254,82 @@ namespace PL.Admin
             MessageBox.Show("Configuration updated successfully");
         }
 
-        /// <summary>
-        /// Gets or sets the system configuration displayed in the UI.
-        /// </summary>
-        public Config Configuration
-        {
-            get { return (Config)GetValue(ConfigurationProperty); }
-            set { SetValue(ConfigurationProperty, value); }
-        }
+        #endregion
 
-        public static readonly DependencyProperty ConfigurationProperty =
-            DependencyProperty.Register(
-                nameof(Configuration),
-                typeof(Config),
-                typeof(AdminWindow),
-                new PropertyMetadata(null)
-            );
+        #region DB Operations
 
         /// <summary>
-        /// Updates the UI when the system clock changes.
+        /// Initializes the database with demo data.
         /// </summary>
-        private void ClockObserver()
+        private async void btnInitDB_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                CurrentTime = s_bl.Admin.GetClock();
-            });
+            if (!Confirm("Initialize Database",
+                "Existing data will be deleted and demo data will be created."))
+                return;
+
+            CloseOtherWindows();
+
+            await RunWithWaitCursorAsync(() =>
+                Task.Run(() => s_bl.Admin.InitializeDB()));
+
+            LoadOrdersSummary();
+            MessageBox.Show("Database was successfully initialized.");
         }
 
         /// <summary>
-        /// Updates the UI when the configuration changes.
+        /// Resets the database and deletes all data.
         /// </summary>
-        private void ConfigObserver()
+        private async void btnResetDB_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                Configuration = s_bl.Admin.GetConfig();
-            });
+            if (!Confirm("Reset Database",
+                "All existing data will be deleted."))
+                return;
+
+            CloseOtherWindows();
+
+            await RunWithWaitCursorAsync(() =>
+                Task.Run(() => s_bl.Admin.ResetDB()));
+
+            LoadOrdersSummary();
+            MessageBox.Show("Database was successfully reset.");
         }
 
-        /// <summary>
-        /// Initializes data and registers observers when the window is loaded.
-        /// </summary>
-        private void AdminWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            CurrentTime = s_bl.Admin.GetClock();
-            Configuration = s_bl.Admin.GetConfig();
+        #endregion
 
-            s_bl.Admin.AddClockObserver(clockObserver);
-            s_bl.Admin.AddConfigObserver(configObserver);
-        }
-
-        /// <summary>
-        /// Unregisters observers when the window is closed.
-        /// </summary>
-        private void AdminWindow_Closed(object sender, EventArgs e)
-        {
-            s_bl.Admin.RemoveClockObserver(clockObserver);
-            s_bl.Admin.RemoveConfigObserver(configObserver);
-        }
+        #region Navigation
 
         /// <summary>
         /// Opens the courier management window.
         /// </summary>
-        private void btnCouriers_Click(object sender, RoutedEventArgs e)
-        {
+        private void btnCouriers_Click(object sender, RoutedEventArgs e) =>
             OpenSingleWindow<CourierListWindow>();
-        }
 
         /// <summary>
         /// Opens the order management window.
         /// </summary>
-        private void btnOrders_Click(object sender, RoutedEventArgs e)
-        {
+        private void btnOrders_Click(object sender, RoutedEventArgs e) =>
             OpenSingleWindow<OrderListWindow>();
+
+        /// <summary>
+        /// Ensures only a single instance of a window is open.
+        /// </summary>
+        private void OpenSingleWindow<T>() where T : Window, new()
+        {
+            var existing = Application.Current.Windows.OfType<T>().FirstOrDefault();
+
+            if (existing != null)
+            {
+                existing.WindowState = WindowState.Normal;
+                existing.Activate();
+            }
+            else
+            {
+                new T().Show();
+            }
         }
 
         /// <summary>
-        /// Closes all other open windows except this one.
+        /// Closes all windows except the admin window.
         /// </summary>
         private void CloseOtherWindows()
         {
@@ -209,150 +338,111 @@ namespace PL.Admin
                     w.Close();
         }
 
+        #endregion
+
+        #region Helpers
+
         /// <summary>
-        /// Executes an action while displaying a wait cursor.
+        /// Displays a confirmation dialog.
         /// </summary>
-        private void RunWithWaitCursor(Action action)
+        private static bool Confirm(string title, string message) =>
+            MessageBox.Show(message, title,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning) == MessageBoxResult.Yes;
+
+        /// <summary>
+        /// Executes an asynchronous action with a wait cursor.
+        /// </summary>
+        private async Task RunWithWaitCursorAsync(Func<Task> action)
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            try { action(); }
+            try { await action(); }
             finally { Mouse.OverrideCursor = null; }
         }
 
         /// <summary>
-        /// Initializes the database with demo data.
-        /// </summary>
-        private void btnInitDB_Click(object sender, RoutedEventArgs e)
-        {
-            var result = MessageBox.Show(
-                "Are you sure you want to initialize the database?\n" +
-                "Existing data will be deleted and demo data will be created.",
-                "Initialize Database",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result != MessageBoxResult.Yes)
-                return;
-
-            CloseOtherWindows();
-
-            RunWithWaitCursor(() =>
-            {
-                s_bl.Admin.InitializeDB();
-            });
-
-            LoadOrdersSummary();
-
-            MessageBox.Show(
-                "Database was successfully initialized.",
-                "Operation Completed",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-
-        /// <summary>
-        /// Resets the database and removes all stored data.
-        /// </summary>
-        private void btnResetDB_Click(object sender, RoutedEventArgs e)
-        {
-            var result = MessageBox.Show(
-                "Are you sure you want to reset the database?",
-                "Reset Database",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result != MessageBoxResult.Yes)
-                return;
-
-            CloseOtherWindows();
-
-            RunWithWaitCursor(() =>
-            {
-                s_bl.Admin.ResetDB();
-            });
-
-            LoadOrdersSummary();
-
-            MessageBox.Show(
-                "Database was successfully reset.",
-                "Operation Completed",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-
-        /// <summary>
-        /// Initializes the admin window, registers observers,
-        /// and loads initial system data.
-        /// </summary>
-        public AdminWindow()
-        {
-            InitializeComponent();
-
-            CurrentTime = s_bl.Admin.GetClock();
-            Configuration = s_bl.Admin.GetConfig();
-
-            clockObserver = ClockObserver;
-            configObserver = ConfigObserver;
-
-            s_bl.Admin.AddClockObserver(clockObserver);
-            s_bl.Admin.AddConfigObserver(configObserver);
-
-            LoadOrdersSummary();
-        }
-
-        /// <summary>
-        /// Retrieves the count of orders for a specific status.
-        /// </summary>
-        private static int GetCount(
-            IDictionary<OrderStatus, int> summary,
-            OrderStatus status)
-        {
-            return summary.TryGetValue(status, out int count)
-                ? count
-                : 0;
-        }
-
-        /// <summary>
-        /// Loads and displays the summary of orders by status.
+        /// Loads and displays a summary of orders by status.
         /// </summary>
         private void LoadOrdersSummary()
         {
-            var summary = s_bl.Admin.GetOrdersCountByStatus();
+            var summary = s_bl.Admin.OrdersCountByStatus;
 
             CreatedOrdersText.Text =
-                $"Created: {GetCount(summary, OrderStatus.Created)}";
+                $"Created: {Get(summary, OrderStatus.Created)}";
 
             InDeliveryOrdersText.Text =
-                $"In Delivery: {GetCount(summary, OrderStatus.InDelivery)}";
+                $"In Delivery: {Get(summary, OrderStatus.InDelivery)}";
 
             DeliveredOrdersText.Text =
-                $"Delivered: {GetCount(summary, OrderStatus.Delivered)}";
+                $"Delivered: {Get(summary, OrderStatus.Delivered)}";
 
             FailedOrdersText.Text =
-                $"Failed: {GetCount(summary, OrderStatus.Failed)}";
+                $"Failed: {Get(summary, OrderStatus.Failed)}";
+
+            var scheduleSummary = s_bl.Admin.GetOrdersCountByScheduleStatus();
+
+            OnTimeOrdersText.Text =
+                $"On Time: {Get(scheduleSummary, ScheduleStatus.OnTime)}";
+
+            AtRiskOrdersText.Text =
+                $"At Risk: {Get(scheduleSummary, ScheduleStatus.SlightDelay)}";
+
+            LateOrdersText.Text =
+                $"Late: {Get(scheduleSummary, ScheduleStatus.Late)}";
+
         }
 
         /// <summary>
-        /// Opens a single instance of a window of the specified type.
+        /// Safely retrieves an order count for a given status.
         /// </summary>
-        private void OpenSingleWindow<T>() where T : Window, new()
+        private static int Get(
+            IDictionary<OrderStatus, int> summary,
+            OrderStatus status) =>
+            summary.TryGetValue(status, out int count) ? count : 0;
+
+        /// <summary>
+        /// Safely retrieves an order count for a given schedule status.
+        /// </summary>
+        private static int Get(
+            IDictionary<ScheduleStatus, int> summary,
+            ScheduleStatus status) =>
+            summary.TryGetValue(status, out int count) ? count : 0;
+
+
+        #endregion
+
+        /// <summary>
+        /// Starts or stops the simulator.
+        /// </summary>
+        private void btnSimulatorToggle_Click(object sender, RoutedEventArgs e)
         {
-            var existingWindow = Application.Current.Windows
-                .OfType<T>()
-                .FirstOrDefault();
-
-            if (existingWindow != null)
+            if (!_isSimulatorRunning)
             {
-                if (existingWindow.WindowState == WindowState.Minimized)
-                    existingWindow.WindowState = WindowState.Normal;
-
-                existingWindow.Activate();
-                existingWindow.Focus();
+                s_bl.Admin.StartSimulator(SimulatorIntervalMinutes);
+                _isSimulatorRunning = true;
             }
             else
             {
-                new T().Show();
+                s_bl.Admin.StopSimulator();
+                _isSimulatorRunning = false;
             }
+
+            UpdateSimulatorUi();
+        }
+
+        /// <summary>
+        /// Updates the simulator UI state and button availability.
+        /// </summary>
+        private void UpdateSimulatorUi()
+        {
+            SimulatorToggleButton.Content =
+                _isSimulatorRunning ? "Stop Simulator" : "Start Simulator";
+
+            BtnMinute.IsEnabled = !_isSimulatorRunning;
+            BtnHour.IsEnabled = !_isSimulatorRunning;
+            BtnDay.IsEnabled = !_isSimulatorRunning;
+            BtnMonth.IsEnabled = !_isSimulatorRunning;
+            BtnYear.IsEnabled = !_isSimulatorRunning;
         }
     }
 }

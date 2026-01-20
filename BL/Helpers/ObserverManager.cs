@@ -6,7 +6,16 @@
 /// </summary>
 class ObserverManager
 {
+    /// <summary>
+    /// Event holding observers that are notified when
+    /// the entire entity list changes (add/remove/update).
+    /// </summary>
     private event Action? _listObservers;
+
+    /// <summary>
+    /// Maps entity identifiers to observers that should be notified
+    /// when a specific entity instance is updated.
+    /// </summary>
     private readonly Dictionary<int, Action?> _specificObservers = new();
 
     /// <summary>

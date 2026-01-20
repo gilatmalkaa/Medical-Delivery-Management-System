@@ -1,5 +1,6 @@
 ﻿using DalApi;
 using DO;
+using System.Runtime.CompilerServices;
 
 namespace Dal;
 
@@ -14,6 +15,8 @@ internal class DeliveryImplementation : IDelivery
     /// Throws <see cref="DalAlreadyExistsException"/> if a delivery with the same ID already exists.
     /// </summary>
     /// <param name="item">The delivery to add.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Create(Delivery item)
     {
         List<Delivery> list = XMLTools.LoadListFromXMLSerializer<Delivery>(Config.s_deliveries_xml);
@@ -31,6 +34,8 @@ internal class DeliveryImplementation : IDelivery
     /// </summary>
     /// <param name="id">The unique delivery ID.</param>
     /// <returns>The delivery with the specified ID or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Delivery? Read(int id)
     {
         List<Delivery> list = XMLTools.LoadListFromXMLSerializer<Delivery>(Config.s_deliveries_xml);
@@ -43,6 +48,8 @@ internal class DeliveryImplementation : IDelivery
     /// </summary>
     /// <param name="filter">A predicate function to filter deliveries.</param>
     /// <returns>The first matching delivery or null if not found.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public Delivery? Read(Func<Delivery, bool> filter)
     {
         List<Delivery> list = XMLTools.LoadListFromXMLSerializer<Delivery>(Config.s_deliveries_xml);
@@ -55,6 +62,8 @@ internal class DeliveryImplementation : IDelivery
     /// </summary>
     /// <param name="filter">Optional predicate to filter the deliveries.</param>
     /// <returns>An enumerable of deliveries.</returns>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public IEnumerable<Delivery> ReadAll(Func<Delivery, bool>? filter = null)
     {
         List<Delivery> list = XMLTools.LoadListFromXMLSerializer<Delivery>(Config.s_deliveries_xml);
@@ -66,6 +75,8 @@ internal class DeliveryImplementation : IDelivery
     /// Throws <see cref="DalDoesNotExistException"/> if the delivery does not exist.
     /// </summary>
     /// <param name="item">The delivery with updated information.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Update(Delivery item)
     {
         List<Delivery> list = XMLTools.LoadListFromXMLSerializer<Delivery>(Config.s_deliveries_xml);
@@ -83,6 +94,8 @@ internal class DeliveryImplementation : IDelivery
     /// Throws <see cref="DalDoesNotExistException"/> if the delivery does not exist.
     /// </summary>
     /// <param name="id">The unique delivery ID to delete.</param>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void Delete(int id)
     {
         List<Delivery> list = XMLTools.LoadListFromXMLSerializer<Delivery>(Config.s_deliveries_xml);
@@ -96,6 +109,8 @@ internal class DeliveryImplementation : IDelivery
     /// <summary>
     /// Deletes all deliveries from the XML data store.
     /// </summary>
+    /// 
+    [MethodImpl(MethodImplOptions.Synchronized)]
     public void DeleteAll()
     {
         XMLTools.SaveListToXMLSerializer(new List<Delivery>(), Config.s_deliveries_xml);
