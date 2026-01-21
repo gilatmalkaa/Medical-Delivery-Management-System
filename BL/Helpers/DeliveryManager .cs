@@ -59,7 +59,9 @@ internal static class DeliveryManager
                 ? (BO.CourierType)courier.Type
                 : BO.CourierType.Unknown,
             StartDeliveryDate = doDelivery.StartDeliveryDate,
-            CompletionStatus = (BO.DeliveryStatus?)doDelivery.CompletionStatus,
+            CompletionStatus = MapDeliveryStatus(
+    (DO.DeliveryStatus)doDelivery.CompletionStatus
+),
             EndDeliveryDate = doDelivery.EndDeliveryDate
         };
     }
@@ -89,7 +91,7 @@ internal static class DeliveryManager
     {
         int newId;
 
-        lock (AdminManager.BlMutex) 
+        lock (AdminManager.BlMutex)
         {
             DO.Order order = s_dal.Order.Read(orderId)
                 ?? throw new BO.BlDoesNotExistException("Order not found");
@@ -102,24 +104,47 @@ internal static class DeliveryManager
                     ? s_dal.Delivery.ReadAll().Max(d => d.Id) + 1
                     : 1;
 
+            var hub = Tools.GetCoordinatesCachedAsync("Main Logistics Center")
+                           .GetAwaiter().GetResult();
+
+            var orderCoords =
+                Tools.GetCoordinatesCachedAsync(order.Address)
+                     .GetAwaiter().GetResult();
+
+            double expectedDistance =
+                (orderCoords.Latitude == 0 && orderCoords.Longitude == 0)
+                    ? 0
+                    : Tools.CalcAirDistance(
+                        hub.Latitude,
+                        hub.Longitude,
+                        orderCoords.Latitude,
+                        orderCoords.Longitude);
+
             DO.Delivery newDelivery = new(
                 Id: newId,
                 OrderId: orderId,
                 CourierId: courierId,
                 Type: order.Type,
-                StartDeliveryDate: AdminManager.Now,
+                StartDeliveryDate: order.OpenDate ?? AdminManager.Now,
                 ActualDistance: 0,
-                ExpectedDistance: null,
+                ExpectedDistance: expectedDistance,    
                 CompletionStatus: DO.DeliveryStatus.InProgress,
                 EndDeliveryDate: null
             );
 
             s_dal.Delivery.Create(newDelivery);
+
+            // ⭐ עדכון סטטוס הזמנה
+            s_dal.Order.Update(order with
+            {
+                Status = DO.OrderStatus.InDelivery
+            });
         }
 
         Observers.NotifyItemUpdated(newId);
         Observers.NotifyListUpdated();
     }
+
 
 
     /// <summary>
@@ -140,7 +165,7 @@ internal static class DeliveryManager
 
             DO.Delivery updated = delivery with
             {
-                CompletionStatus = (DO.DeliveryStatus)newStatus,
+                CompletionStatus = MapToDoStatus(newStatus),
                 StartDeliveryDate = start,
                 EndDeliveryDate = end
             };
@@ -181,7 +206,45 @@ internal static class DeliveryManager
         Observers.NotifyListUpdated();
     }
 
+    /// <summary>
+    /// Maps a delivery status from the Data Object (DO) layer
+    /// to the corresponding Business Object (BO) delivery status.
+    /// This method is used when data is read from the DAL and
+    /// exposed to the business logic or UI.
+    /// </summary>
+    /// <param name="status">Delivery status from the DO layer.</param>
+    /// <returns>Mapped delivery status for the BO layer.</returns>
+    private static BO.DeliveryStatus MapDeliveryStatus(DO.DeliveryStatus status)
+{
+    return status switch
+    {
+        DO.DeliveryStatus.Pending    => BO.DeliveryStatus.InProgress,
+        DO.DeliveryStatus.InProgress => BO.DeliveryStatus.InProgress,
+        DO.DeliveryStatus.Delivered  => BO.DeliveryStatus.Delivered,
+        DO.DeliveryStatus.Canceled   => BO.DeliveryStatus.Canceled,
+        _                            => BO.DeliveryStatus.Failed
+    };
+}
+    /// <summary>
+    /// Maps a delivery status from the Business Object (BO) layer
+    /// back to the Data Object (DO) delivery status.
+    /// This method is used before persisting delivery data
+    /// into the DAL.
+    /// </summary>
+    /// <param name="status">Delivery status from the BO layer.</param>
+    /// <returns>Mapped delivery status for the DO layer.</returns>
 
+    private static DO.DeliveryStatus MapToDoStatus(BO.DeliveryStatus status)
+{
+    return status switch
+    {
+        BO.DeliveryStatus.InProgress => DO.DeliveryStatus.InProgress,
+        BO.DeliveryStatus.Delivered  => DO.DeliveryStatus.Delivered,
+        BO.DeliveryStatus.Canceled   => DO.DeliveryStatus.Canceled,
+        BO.DeliveryStatus.Failed     => DO.DeliveryStatus.Canceled,
+        _                            => DO.DeliveryStatus.Canceled
+    };
+}
     /// <summary>
     /// Retrieves all completed deliveries handled by a specific courier.
     /// </summary>
@@ -191,12 +254,12 @@ internal static class DeliveryManager
         return s_dal.Delivery
             .ReadAll(d =>
                 d.CourierId == courierId &&
-                d.CompletionStatus == DO.DeliveryStatus.Delivered)
+                d.CompletionStatus != DO.DeliveryStatus.InProgress)
             .Select(d =>
             {
-                DO.Order order = s_dal.Order.Read(d.OrderId)
-                    ?? throw new BO.BlDoesNotExistException(
-                        $"Order {d.OrderId} not found");
+                DO.Order? order = s_dal.Order.Read(d.OrderId);
+                if (order == null)
+                    return null;
 
                 return new BO.ClosedDeliveryInList
                 {
@@ -208,10 +271,15 @@ internal static class DeliveryManager
                     TreatmentTime =
                         d.EndDeliveryDate!.Value - d.StartDeliveryDate,
                     CompletionStatus =
-                        (BO.DeliveryStatus?)d.CompletionStatus
+    MapDeliveryStatus((DO.DeliveryStatus)d.CompletionStatus)
+
                 };
-            });
+            })
+            .Where(cd => cd != null)!
+            .Select(cd => cd!);
     }
+
+
 
     /// <summary>
     /// Performs periodic delivery status updates based on system clock progression.
@@ -236,9 +304,12 @@ internal static class DeliveryManager
                     if (delivery.ExpectedDistance == null)
                         continue;
 
-                    var expectedEnd =
-                        delivery.StartDeliveryDate +
-                        TimeSpan.FromMinutes(delivery.ExpectedDistance.Value * 5);
+                    var duration =
+                        Tools.CalcDeliveryDuration(delivery.ExpectedDistance.Value);
+
+
+                    var expectedEnd = delivery.StartDeliveryDate + duration;
+
 
                     if (newClock >= expectedEnd)
                     {
@@ -293,6 +364,21 @@ internal static class DeliveryManager
         }
     }
 
+
+    /// <summary>
+    /// Automatically assigns open orders to available couriers.
+    /// The method scans for active couriers that currently have no ongoing delivery,
+    /// and assigns them the oldest created order (by OpenDate).
+    /// Assignment is done in a thread-safe manner to prevent race conditions.
+    /// </summary>
+    /// <param name="from">
+    /// Start of the time range for automatic assignment (currently not used,
+    /// reserved for future scheduling logic).
+    /// </param>
+    /// <param name="to">
+    /// End of the time range for automatic assignment (currently not used,
+    /// reserved for future scheduling logic).
+    /// </param>
     internal static void AssignOrdersAutomatically(DateTime from, DateTime to)
     {
         lock (AdminManager.BlMutex)
@@ -324,10 +410,6 @@ internal static class DeliveryManager
 
                 Create(order.Id, courier.Id);
 
-                s_dal.Order.Update(order with
-                {
-                    Status = DO.OrderStatus.InDelivery
-                });
             }
         }
 

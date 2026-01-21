@@ -189,9 +189,10 @@ internal static class AdminManager
         lock (BlMutex)
         {
             s_dal.ResetDB();
-            UpdateClock(s_dal.Config.Clock);
+            UpdateClock(DateTime.Now);
         }
     }
+
 
     /// <summary>
     /// Initializes the database and refreshes
@@ -202,9 +203,10 @@ internal static class AdminManager
         ThrowOnSimulatorIsRunning();
         lock (BlMutex)
         {
-            UpdateClock(s_dal.Config.Clock);
+            UpdateClock(DateTime.Now);
         }
     }
+
 
     /// <summary>
     /// Calculates the number of orders
@@ -229,10 +231,11 @@ internal static class AdminManager
 
                 return delivery.CompletionStatus switch
                 {
+                    DO.DeliveryStatus.Pending => OrderStatus.Assigned,
                     DO.DeliveryStatus.InProgress => OrderStatus.InDelivery,
                     DO.DeliveryStatus.Delivered => OrderStatus.Delivered,
-                    DO.DeliveryStatus.Canceled => OrderStatus.Failed,
-                    _ => OrderStatus.Created
+                    DO.DeliveryStatus.Canceled => OrderStatus.Canceled,
+                    _ => OrderStatus.Failed
                 };
             })
             .GroupBy(status => status)
@@ -368,6 +371,4 @@ internal static class AdminManager
 
         return ScheduleStatus.Late;
     }
-
-
 }

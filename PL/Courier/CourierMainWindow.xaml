@@ -244,7 +244,9 @@
                         <!-- Remaining time -->
                         <TextBlock Style="{StaticResource Label}" Text="Remaining Time"/>
                         <TextBlock Style="{StaticResource Value}"
-               Text="{Binding Courier.CurrentOrder.RemainingTimeToFinishOrder}"/>
+           Text="{Binding Courier.CurrentOrder.RemainingTimeToFinishOrder,
+                          StringFormat={}{0:hh\\:mm\\:ss}}"/>
+
 
 
                         <Button Content="Finish Delivery"

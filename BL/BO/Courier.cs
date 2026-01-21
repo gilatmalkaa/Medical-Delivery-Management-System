@@ -64,7 +64,8 @@ public class Courier
     /// <summary>
     /// Total number of deliveries handled by the courier.
     /// </summary>
-    public int TotalDeliveries { get; set; }
+    public int TotalDeliveries =>
+        DeliveredOnTimeCount + DeliveredLateCount;
 
     /// <summary>
     /// Number of deliveries completed on time.

@@ -67,6 +67,7 @@ namespace PL.Admin
             set => SetValue(CurrentTimeProperty, value);
         }
 
+
         /// <summary>
         /// Dependency property backing store for CurrentTime.
         /// </summary>

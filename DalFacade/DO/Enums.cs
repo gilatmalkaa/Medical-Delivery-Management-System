@@ -29,7 +29,7 @@
         Pending,
         InProgress,
         Delivered,
-        Canceled
+        Canceled,
     }
 
     /// <summary>

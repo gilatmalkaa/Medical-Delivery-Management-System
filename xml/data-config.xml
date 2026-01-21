@@ -4,17 +4,17 @@
   <AdminId>123456789</AdminId>
   <AdminPassword>admin123</AdminPassword>
   <!-- ===== System time ===== -->
-  <Clock>19/01/2026 09:48:13</Clock>
+  <Clock>21/01/2026 20:09:28</Clock>
   <!-- ===== Delivery constraints ===== -->
-  <MaxRange>30</MaxRange>
-  <SampleExpirationMinutes>90</SampleExpirationMinutes>
-  <MaxDeliveryDurationMinutes>180</MaxDeliveryDurationMinutes>
+  <MaxRange>40</MaxRange>
+  <SampleExpirationMinutes>120</SampleExpirationMinutes>
+  <MaxDeliveryDurationMinutes>240</MaxDeliveryDurationMinutes>
   <!-- ===== Courier speeds (km/h) ===== -->
-  <FootSpeed>4.5</FootSpeed>
-  <BikeSpeed>15.0</BikeSpeed>
-  <MotorcycleSpeed>35.0</MotorcycleSpeed>
-  <CarSpeed>50.0</CarSpeed>
+  <FootSpeed>6</FootSpeed>
+  <BikeSpeed>18</BikeSpeed>
+  <MotorcycleSpeed>45</MotorcycleSpeed>
+  <CarSpeed>70</CarSpeed>
   <!-- ===== Pricing ===== -->
-  <BaseDeliveryPrice>25.0</BaseDeliveryPrice>
-  <PricePerKm>3.2</PricePerKm>
+  <BaseDeliveryPrice>30</BaseDeliveryPrice>
+  <PricePerKm>4.1</PricePerKm>
 </config>

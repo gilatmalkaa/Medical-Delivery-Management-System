@@ -21,41 +21,70 @@ internal class ConfigImplementation : IConfig
         set => Config.Clock = value;
     }
 
+
     /// <summary>
-    /// Gets or sets the maximum delivery range.
+    /// Gets or sets the maximum allowed delivery range (in kilometers)
+    /// for assigning orders to couriers.
     /// </summary>
     public int MaxRange
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => (int)Config.AirDistance;
+        get => Config.MaxRange;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => Config.AirDistance = value;
+        set => Config.MaxRange = value;
     }
 
     /// <summary>
-    /// Gets or sets the delivery speed for foot couriers.
+    /// Gets or sets the maximum delivery duration (in minutes)
+    /// before a delivery is considered late.
+    /// </summary>
+    public int MaxDeliveryDurationMinutes
+    {
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        get => Config.MaxDeliveryDurationMinutes;
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        set => Config.MaxDeliveryDurationMinutes = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the expiration time (in minutes)
+    /// for medical or time-sensitive samples.
+    /// </summary>
+    public int SampleExpirationMinutes
+    {
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        get => Config.SampleExpirationMinutes;
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        set => Config.SampleExpirationMinutes = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the average delivery speed (km/h)
+    /// for couriers traveling on foot.
     /// </summary>
     public double FootSpeed
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => Config.WalkingSpeed;
+        get => Config.FootSpeed;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => Config.WalkingSpeed = value;
+        set => Config.FootSpeed = value;
     }
 
     /// <summary>
-    /// Gets or sets the delivery speed for bicycle couriers.
+    /// Gets or sets the average delivery speed (km/h)
+    /// for couriers using bicycles.
     /// </summary>
     public double BikeSpeed
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => Config.VehicleSpeed;
+        get => Config.BikeSpeed;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => Config.VehicleSpeed = value;
+        set => Config.BikeSpeed = value;
     }
 
     /// <summary>
-    /// Gets or sets the delivery speed for motorcycle couriers.
+    /// Gets or sets the average delivery speed (km/h)
+    /// for couriers using bicycles.
     /// </summary>
     public double MotorcycleSpeed
     {
@@ -66,80 +95,63 @@ internal class ConfigImplementation : IConfig
     }
 
     /// <summary>
-    /// Gets or sets the delivery speed for car couriers.
+    /// Gets or sets the average delivery speed (km/h)
+    /// for couriers using cars.
     /// </summary>
     public double CarSpeed
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => Config.VehicleSpeed;
+        get => Config.CarSpeed;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => Config.VehicleSpeed = value;
+        set => Config.CarSpeed = value;
     }
 
     /// <summary>
-    /// Gets or sets the expiration time for samples in minutes.
-    /// </summary>
-    public int SampleExpirationMinutes
-    {
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        get => (int)Config.IdleTimeRange.TotalMinutes;
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        set => Config.IdleTimeRange = TimeSpan.FromMinutes(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the maximum allowed delivery duration in minutes.
-    /// </summary>
-    public int MaxDeliveryDurationMinutes
-    {
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        get => (int)Config.DeliveryWindow.TotalMinutes;
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        set => Config.DeliveryWindow = TimeSpan.FromMinutes(value);
-    }
-
-    /// <summary>
-    /// Gets or sets the base price for a delivery.
-    /// </summary>
-    public double BaseDeliveryPrice
-    {
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        get => _baseDeliveryPrice;
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        set => _baseDeliveryPrice = value;
-    }
-
-    /// <summary>
-    /// Gets or sets the additional price charged per kilometer.
+    /// Gets or sets the price charged per kilometer
+    /// for delivery cost calculation.
     /// </summary>
     public double PricePerKm
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => _pricePerKm;
+        get => Config.PricePerKm;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => _pricePerKm = value;
+        set => Config.PricePerKm = value;
     }
 
     /// <summary>
-    /// Gets or sets the administrator identifier.
+    /// Gets or sets the price charged per kilometer
+    /// for delivery cost calculation.
+    /// </summary>
+    public double BaseDeliveryPrice
+    {
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        get => Config.BaseDeliveryPrice;
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        set => Config.BaseDeliveryPrice = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the administrator identifier
+    /// used for authentication and privileged operations.
     /// </summary>
     public string AdminId
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => throw new NotImplementedException();
+        get => Config.AdminId;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => throw new NotImplementedException();
+        set => Config.AdminId = value;
     }
 
     /// <summary>
-    /// Gets or sets the administrator password.
+    /// Gets or sets the administrator password
+    /// used for authentication and access to system management features.
     /// </summary>
     public string AdminPassword
     {
         [MethodImpl(MethodImplOptions.Synchronized)]
-        get => throw new NotImplementedException();
+        get => Config.AdminPassword;
         [MethodImpl(MethodImplOptions.Synchronized)]
-        set => throw new NotImplementedException();
+        set => Config.AdminPassword = value;
     }
 
     /// <summary>

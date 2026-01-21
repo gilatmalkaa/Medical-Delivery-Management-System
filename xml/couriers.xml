@@ -2,9 +2,9 @@
 <ArrayOfCourier xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Courier>
     <Id>1</Id>
-    <FullName>israel israeli</FullName>
+    <FullName>israel israel</FullName>
     <Password>1234</Password>
-    <Phone>0501234568</Phone>
+    <Phone>0501234569</Phone>
     <Email>courier1@mail.com</Email>
     <Signature />
     <MaxPersonalDeliveryDistance>20</MaxPersonalDeliveryDistance>

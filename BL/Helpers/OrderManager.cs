@@ -42,12 +42,6 @@ internal static class OrderManager
     private static readonly DalApi.IDal s_dal = DalApi.Factory.Get;
 
     /// <summary>
-    /// Assumed courier average speed (in kilometers per hour),
-    /// used for calculating expected delivery times.
-    /// </summary>
-    private const double CourierSpeedKmPerHour = 40.0;
-
-    /// <summary>
     /// Retrieves a full Order business object by ID, including deliveries,
     /// calculated distances, timing, status, and scheduling information.
     /// </summary>
@@ -68,41 +62,42 @@ internal static class OrderManager
                 s_dal.Delivery.ReadAll(d => d.OrderId == id).ToList());
 
         var (lat, lon) =
-           await Tools.GetCoordinatesCachedAsync(doOrder.Address ?? "");
+            await Tools.GetCoordinatesCachedAsync(doOrder.Address ?? "");
+
+        var hubCoords =
+            await Tools.GetCoordinatesCachedAsync("Main Logistics Center");
 
         double airDistance =
-            Tools.CalcAirDistance(lat, lon, 32.0853, 34.7818);
+            Tools.CalcAirDistance(
+                hubCoords.Latitude,
+                hubCoords.Longitude,
+                lat,
+                lon);
 
-        DateTime createdAt = doOrder.OpenDate ?? DateTime.Now;
-        DateTime expectedDeliveryTime = createdAt;
-
-        DateTime maxDeliveryTime =
-            Tools.CalcMaxDeliveryTime(
-                expectedDeliveryTime,
-                (BO.OrderType)doOrder.Type);
-
-        TimeSpan timeRemaining =
-            maxDeliveryTime > DateTime.Now
-                ? maxDeliveryTime - DateTime.Now
-                : TimeSpan.Zero;
+        DateTime? expectedDeliveryTime = null;
+        DateTime? maxDeliveryTime = null;
+        TimeSpan timeRemaining = TimeSpan.Zero;
 
         if (activeDelivery != null)
         {
             expectedDeliveryTime =
-                Tools.CalcExpectedDeliveryTime(
-                    activeDelivery.StartDeliveryDate,
-                    airDistance,
-                    CourierSpeedKmPerHour);
+                activeDelivery.StartDeliveryDate +
+                Tools.CalcDeliveryDuration(
+                    activeDelivery.ExpectedDistance ?? 0);
+
+            ;
 
             maxDeliveryTime =
                 Tools.CalcMaxDeliveryTime(
-                    expectedDeliveryTime,
+                    expectedDeliveryTime.Value,
                     (BO.OrderType)doOrder.Type);
 
-            timeRemaining =
-                maxDeliveryTime > DateTime.Now
-                    ? maxDeliveryTime - DateTime.Now
-                    : TimeSpan.Zero;
+            var now = AdminManager.Now;
+
+timeRemaining =
+    maxDeliveryTime > now
+        ? maxDeliveryTime.Value - now
+        : TimeSpan.Zero;
         }
 
         DateTime? deliveredAt =
@@ -138,13 +133,14 @@ internal static class OrderManager
         };
     }
 
+
     /// <summary>
     /// Retrieves a summarized list of all orders for list display,
     /// including status, timing, and delivery counts.
     /// </summary>
     internal static IEnumerable<BO.OrderInList> GetAll()
     {
-        DateTime now = DateTime.Now;
+        DateTime now = AdminManager.Now;
 
         return s_dal.Order.ReadAll().Select(o =>
         {
@@ -153,20 +149,20 @@ internal static class OrderManager
 
             DO.Delivery? last = deliveries.LastOrDefault();
 
-            if (o.OpenDate == null)
-                throw new BlInvalidInputException(
-                    $"Order {o.Id} has no OpenDate");
+            TimeSpan handlingTime =
+                o.OpenDate != null ? now - o.OpenDate.Value : TimeSpan.Zero;
 
-            TimeSpan handlingTime = now - o.OpenDate.Value;
             TimeSpan timeRemaining = TimeSpan.Zero;
 
             if (last?.ExpectedDistance != null &&
                 last.CompletionStatus == DO.DeliveryStatus.InProgress)
             {
-                double totalMinutes = last.ExpectedDistance.Value * 5;
+                TimeSpan totalTime =
+                    Tools.CalcDeliveryDuration(last.ExpectedDistance.Value);
+
                 TimeSpan elapsed = now - last.StartDeliveryDate;
-                timeRemaining =
-                    TimeSpan.FromMinutes(totalMinutes) - elapsed;
+
+                timeRemaining = totalTime - elapsed;
             }
 
             return new BO.OrderInList
@@ -189,6 +185,7 @@ internal static class OrderManager
             };
         });
     }
+
 
     /// <summary>
     /// Retrieves all orders, optionally filtered.
@@ -236,7 +233,7 @@ internal static class OrderManager
                 CustomerName = order.CustomerName,
                 CustomerPhone = order.CustomerPhone,
                 Weight = 0,
-                OpenDate = DateTime.Now
+                OpenDate = AdminManager.Now
             };
 
             s_dal.Order.Create(doOrder);
@@ -333,8 +330,8 @@ internal static class OrderManager
                     Id = newId,
                     OrderId = orderId,
                     CourierId = 0,
-                    StartDeliveryDate = DateTime.Now,
-                    EndDeliveryDate = DateTime.Now,
+                    StartDeliveryDate = order.OpenDate ?? AdminManager.Now,
+                    EndDeliveryDate = AdminManager.Now,
                     ExpectedDistance = 0,
                     CompletionStatus = DO.DeliveryStatus.Canceled
                 });
@@ -347,28 +344,36 @@ internal static class OrderManager
 
 
     /// <summary>
-    /// Calculates the overall order status based on its deliveries.
+    /// Calculates the current business-level order status
+    /// based on the list of deliveries associated with the order.
+    /// The status is determined according to the most recent delivery.
     /// </summary>
-    private static BO.OrderStatus CalcOrderStatus(
-        List<DO.Delivery> deliveries)
+    /// <param name="deliveries">
+    /// A list of delivery records related to the order.
+    /// </param>
+    /// <returns>
+    /// The calculated order status in the BO layer:
+    /// Created, InDelivery, Delivered, Canceled, or Assigned.
+    /// </returns>
+    private static BO.OrderStatus CalcOrderStatus(List<DO.Delivery> deliveries)
     {
         if (!deliveries.Any())
             return BO.OrderStatus.Created;
 
-        if (deliveries.Any(d =>
-            d.CompletionStatus == DO.DeliveryStatus.InProgress))
-            return BO.OrderStatus.InDelivery;
+        var last = deliveries
+            .OrderBy(d => d.Id)
+            .Last();
 
-        if (deliveries.All(d =>
-            d.CompletionStatus == DO.DeliveryStatus.Delivered))
-            return BO.OrderStatus.Delivered;
-
-        if (deliveries.Any(d =>
-            d.CompletionStatus == DO.DeliveryStatus.Canceled))
-            return BO.OrderStatus.Failed;
-
-        return BO.OrderStatus.Assigned;
+        return last.CompletionStatus switch
+        {
+            DO.DeliveryStatus.InProgress => BO.OrderStatus.InDelivery,
+            DO.DeliveryStatus.Delivered => BO.OrderStatus.Delivered,
+            DO.DeliveryStatus.Canceled => BO.OrderStatus.Canceled,
+            _ => BO.OrderStatus.Assigned
+        };
     }
+
+
 
     /// <summary>
     /// Deletes all orders from the system.
@@ -468,39 +473,35 @@ internal static class OrderManager
 
                 foreach (var order in orders)
                 {
-                    var deliveries = s_dal.Delivery
-                        .ReadAll(d => d.OrderId == order.Id)
-                        .ToList();
+                    var deliveries =
+                        s_dal.Delivery.ReadAll(d => d.OrderId == order.Id).ToList();
 
-                    var status = CalcOrderStatus(deliveries);
+                    var active =
+                        deliveries.FirstOrDefault(d =>
+                            d.CompletionStatus == DO.DeliveryStatus.InProgress);
 
-                    if (status is BO.OrderStatus.Delivered or BO.OrderStatus.Failed)
+                    if (active == null)
                         continue;
 
-                    if (order.OpenDate != null)
+                    if (active.ExpectedDistance == null)
+                        continue;
+
+                    DateTime expected =
+                        active.StartDeliveryDate +
+                        Tools.CalcDeliveryDuration(active.ExpectedDistance.Value);
+
+                    DateTime maxTime =
+                        Tools.CalcMaxDeliveryTime(
+                            expected,
+                            (BO.OrderType)order.Type);
+
+                    if (newClock > maxTime)
                     {
-                        var maxTime =
-                            Tools.CalcMaxDeliveryTime(
-                                order.OpenDate.Value,
-                                (BO.OrderType)order.Type);
-
-                        if (newClock > maxTime)
+                        s_dal.Delivery.Update(active with
                         {
-                            int newId =
-                                s_dal.Delivery.ReadAll().Any()
-                                    ? s_dal.Delivery.ReadAll().Max(d => d.Id) + 1
-                                    : 1;
-
-                            s_dal.Delivery.Create(new DO.Delivery
-                            {
-                                Id = newId,
-                                OrderId = order.Id,
-                                CourierId = 0,
-                                StartDeliveryDate = newClock,
-                                EndDeliveryDate = newClock,
-                                CompletionStatus = DO.DeliveryStatus.Canceled
-                            });
-                        }
+                            CompletionStatus = DO.DeliveryStatus.Canceled,
+                            EndDeliveryDate = newClock
+                        });
                     }
                 }
             }
@@ -510,6 +511,8 @@ internal static class OrderManager
             s_periodicMutex.UnsetInProgress();
         }
     }
+
+
 
     /// <summary>
     /// Simulates order-related activity during simulator runtime.

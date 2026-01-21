@@ -180,9 +180,25 @@ internal static class Tools
             : BO.ScheduleStatus.Late;
     }
 
+    /// <summary>
+    /// Cache for storing resolved geographic coordinates per address.
+    /// Prevents repeated calls to the external geocoding service
+    /// for the same address and improves performance.
+    /// </summary>
     private static readonly ConcurrentDictionary<string, (double Lat, double Lon)>
         _coordinatesCache = new();
 
+    /// <summary>
+    /// Retrieves geographic coordinates (latitude, longitude) for a given address,
+    /// using an in-memory cache to avoid redundant geocoding requests.
+    /// </summary>
+    /// <param name="address">
+    /// The textual address to resolve into coordinates.
+    /// </param>
+    /// <returns>
+    /// A tuple containing (Latitude, Longitude).
+    /// Returns (0, 0) if the address is invalid or resolution fails.
+    /// </returns>
     public static async Task<(double Latitude, double Longitude)>
         GetCoordinatesCachedAsync(string address)
     {
@@ -203,6 +219,22 @@ internal static class Tools
         {
             return (0, 0);
         }
+    }
+
+    /// <summary>
+    /// Courier average speed in km/h (single source of truth)
+    /// </summary>
+    internal const double CourierSpeedKmPerHour = 40.0;
+
+    /// <summary>
+    /// Calculates delivery duration based on distance and courier speed.
+    /// </summary>
+    internal static TimeSpan CalcDeliveryDuration(double distanceKm)
+    {
+        if (distanceKm <= 0)
+            return TimeSpan.Zero;
+
+        return TimeSpan.FromHours(distanceKm / CourierSpeedKmPerHour);
     }
 
     /// <summary>

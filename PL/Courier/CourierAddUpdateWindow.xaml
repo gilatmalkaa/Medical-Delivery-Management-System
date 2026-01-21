@@ -175,14 +175,14 @@
          Text="{Binding CurrentCourier.CurrentOrder.Description,
                         TargetNullValue=-,
                         FallbackValue=-}"
-         TextDecorations="Strikethrough"/>
+/>
 
                         <TextBlock Text="Address" Style="{StaticResource FieldLabel}"/>
                         <TextBox Style="{StaticResource ReadOnlyBox}"
          Text="{Binding CurrentCourier.CurrentOrder.Address,
                         TargetNullValue=-,
                         FallbackValue=-}"
-         TextDecorations="Strikethrough"/>
+/>
 
                         <TextBlock Text="Air Distance (km)" Style="{StaticResource FieldLabel}"/>
                         <TextBox Style="{StaticResource ReadOnlyBox}"
@@ -201,7 +201,7 @@
          Text="{Binding CurrentCourier.CurrentOrder.CustomerName,
                         TargetNullValue=-,
                         FallbackValue=-}"
-         TextDecorations="Strikethrough"/>
+/>
 
 
                         <TextBlock Text="Customer Phone" Style="{StaticResource FieldLabel}"/>
@@ -209,7 +209,7 @@
          Text="{Binding CurrentCourier.CurrentOrder.CustomerPhone,
                         TargetNullValue=-,
                         FallbackValue=-}"
-         TextDecorations="Strikethrough"/>
+/>
                         
                         <TextBlock Text="Order Open Date" Style="{StaticResource FieldLabel}"/>
                         <TextBox Style="{StaticResource ReadOnlyBox}"
@@ -248,10 +248,12 @@
                                                 FallbackValue='-'}"/>
 
                         <TextBlock Text="Remaining Time" Style="{StaticResource FieldLabel}"/>
+
                         <TextBox Style="{StaticResource ReadOnlyBox}"
-                                 Text="{Binding CurrentCourier.CurrentOrder.RemainingTimeToFinishOrder,
-                                                TargetNullValue='00:00:00',
-                                                FallbackValue='00:00:00'}"/>
+         Text="{Binding CurrentCourier.CurrentOrder.RemainingTimeToFinishOrder,
+                        StringFormat={}{0:hh\\:mm\\:ss},
+                        TargetNullValue='-',
+                        FallbackValue='-'}"/>
                     </StackPanel>
                 </Border>
 

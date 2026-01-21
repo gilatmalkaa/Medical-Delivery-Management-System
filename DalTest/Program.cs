@@ -152,7 +152,12 @@ namespace DalTest
         private static void ShowOrderById()
         {
             Console.Write("Enter ID: ");
-            int id = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
+
             try
             {
                 var order = s_dal!.Order.Read(id);
@@ -194,7 +199,12 @@ namespace DalTest
         private static void DeleteOrder()
         {
             Console.Write("Enter ID to delete: ");
-            int delId = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int delId))
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
+
             try
             {
                 s_dal!.Order.Delete(delId);
@@ -290,7 +300,12 @@ namespace DalTest
         private static void ShowCourierById()
         {
             Console.Write("Enter ID: ");
-            int id = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
+
             try
             {
                 var courier = s_dal!.Courier.Read(id);
@@ -332,7 +347,11 @@ namespace DalTest
         private static void DeleteCourier()
         {
             Console.Write("Enter ID to delete: ");
-            int delId = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int delId))
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
             try
             {
                 s_dal!.Courier.Delete(delId);
@@ -395,9 +414,19 @@ namespace DalTest
         private static void AddDelivery()
         {
             Console.Write("Enter Order ID: ");
-            int orderId = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int orderId))
+            {
+                Console.WriteLine("Invalid Order ID.");
+                return;
+            }
+
             Console.Write("Enter Courier ID: ");
-            int courierId = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int courierId))
+            {
+                Console.WriteLine("Invalid Courier ID.");
+                return;
+            }
+
 
             var delivery = new Delivery(
                 Id: 0,
@@ -432,7 +461,12 @@ namespace DalTest
         private static void ShowDeliveryById()
         {
             Console.Write("Enter ID: ");
-            int id = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
+
             try
             {
                 var delivery = s_dal!.Delivery.Read(id);
@@ -474,7 +508,12 @@ namespace DalTest
         private static void DeleteDelivery()
         {
             Console.Write("Enter ID to delete: ");
-            int delId = int.Parse(Console.ReadLine()!);
+            if (!int.TryParse(Console.ReadLine(), out int delId))
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
+
             try
             {
                 s_dal!.Delivery.Delete(delId);

@@ -80,7 +80,6 @@ internal static class CourierManager
     /// <returns>Courier business object.</returns>
     internal static BO.Courier Get(int id)
     {
-        const double KM_PER_MINUTE = 0.5;
 
         DO.Courier? c = s_dal.Courier.Read(id);
         if (c == null)
@@ -96,7 +95,7 @@ internal static class CourierManager
             d.ExpectedDistance != null &&
             d.EndDeliveryDate <=
                 d.StartDeliveryDate +
-                TimeSpan.FromMinutes(d.ExpectedDistance.Value / KM_PER_MINUTE)
+                Tools.CalcDeliveryDuration(d.ExpectedDistance.Value)
         );
 
         int deliveredLate = deliveries.Count(d =>
@@ -105,8 +104,9 @@ internal static class CourierManager
             d.ExpectedDistance != null &&
             d.EndDeliveryDate >
                 d.StartDeliveryDate +
-                TimeSpan.FromMinutes(d.ExpectedDistance.Value / KM_PER_MINUTE)
+                Tools.CalcDeliveryDuration(d.ExpectedDistance.Value)
         );
+
 
         var activeDelivery = deliveries
             .FirstOrDefault(d => d.CompletionStatus == DO.DeliveryStatus.InProgress);
@@ -120,14 +120,27 @@ internal static class CourierManager
             {
                 double distance = activeDelivery.ExpectedDistance ?? 0;
 
-                TimeSpan expectedDuration =
-                    TimeSpan.FromMinutes(distance / KM_PER_MINUTE);
-
                 DateTime expectedDeliveryTime =
-                    activeDelivery.StartDeliveryDate + expectedDuration;
+                    activeDelivery.StartDeliveryDate +
+                    Tools.CalcDeliveryDuration(distance);
+
+                DateTime latestSupplyTime =
+                    Tools.CalcMaxDeliveryTime(
+                        expectedDeliveryTime,
+                        (BO.OrderType)order.Type);
+                var now = AdminManager.Now;
+
+                if (now < activeDelivery.StartDeliveryDate)
+                {
+                    now = activeDelivery.StartDeliveryDate;
+                }
 
                 TimeSpan remaining =
-                    expectedDeliveryTime - AdminManager.Now;
+                    now < expectedDeliveryTime
+                        ? expectedDeliveryTime - now
+                        : TimeSpan.Zero;
+
+
 
                 currentOrder = new BO.OrderInProgress
                 {
@@ -143,16 +156,15 @@ internal static class CourierManager
                     OpenDate = order.OpenDate ?? AdminManager.Now,
                     StartDeliveryDate = activeDelivery.StartDeliveryDate,
                     ExpectedArrivalTime = expectedDeliveryTime,
-                    LatestSupplyTime = expectedDeliveryTime,
+                    LatestSupplyTime = latestSupplyTime,
                     OrderStatus = BO.OrderStatus.InDelivery,
-                    ScheduleStatus =
-                        remaining > TimeSpan.Zero
-                            ? BO.ScheduleStatus.OnTime
-                            : BO.ScheduleStatus.Late,
+
+                    ScheduleStatus = remaining > TimeSpan.Zero
+        ? BO.ScheduleStatus.OnTime
+        : BO.ScheduleStatus.Late,
+
                     RemainingTimeToFinishOrder =
-                        remaining > TimeSpan.Zero
-                            ? remaining
-                            : TimeSpan.Zero
+                                 remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero
                 };
             }
         }
@@ -160,8 +172,7 @@ internal static class CourierManager
         bool isAvailable =
             c.IsActive &&
             !deliveries.Any(d =>
-                d.CompletionStatus == DO.DeliveryStatus.InProgress ||
-                d.CompletionStatus == DO.DeliveryStatus.Pending);
+                d.CompletionStatus == DO.DeliveryStatus.InProgress);
 
         return new BO.Courier
         {
@@ -242,7 +253,10 @@ internal static class CourierManager
         return s_dal.Courier.ReadAll()
             .Select(c =>
             {
-                var deliveries = s_dal.Delivery.ReadAll(d => d.CourierId == c!.Id).ToList();
+                var deliveries = s_dal.Delivery.ReadAll(d =>
+                    d.CourierId == c.Id
+                ).ToList();
+
 
                 return new BO.CourierInList
                 {
@@ -350,40 +364,31 @@ internal static class CourierManager
     /// <summary>
     /// Assigns an open order to a courier.
     /// </summary>
+    /// <summary>
+    /// Assigns an open order to a courier.
+    /// </summary>
     internal static void AssignOrder(int courierId, int orderId)
     {
-        lock (AdminManager.BlMutex) 
+        lock (AdminManager.BlMutex)
         {
-            var courier = Get(courierId);
-            if (!courier.IsAvailable)
+            var _courier = Get(courierId);
+            if (!_courier.IsAvailable)
                 throw new InvalidOperationException("Courier is not available");
 
-            var order = s_dal.Order.Read(orderId)
+            var _order = s_dal.Order.Read(orderId)
                 ?? throw new InvalidOperationException("Order does not exist");
 
-            if (order.Status != DO.OrderStatus.Created)
+            if (_order.Status != DO.OrderStatus.Created)
                 throw new InvalidOperationException("Order is not open");
-
-            int newDeliveryId =
-                s_dal.Delivery.ReadAll().Any()
-                    ? s_dal.Delivery.ReadAll().Max(d => d.Id) + 1
-                    : 1;
-
-            s_dal.Delivery.Create(new DO.Delivery
-            {
-                Id = newDeliveryId,
-                OrderId = orderId,
-                CourierId = courierId,
-                StartDeliveryDate = AdminManager.Now,
-                CompletionStatus = DO.DeliveryStatus.InProgress
-            });
-
-            s_dal.Order.Update(order with { Status = DO.OrderStatus.InDelivery });
         }
+
+        DeliveryManager.Create(orderId, courierId);
 
         Observers.NotifyItemUpdated(courierId);
         Observers.NotifyListUpdated();
     }
+
+
 
 
     /// <summary>
@@ -401,16 +406,32 @@ internal static class CourierManager
             if (delivery == null)
                 throw new BO.BlInvalidOperationException("No active delivery");
 
-            s_dal.Delivery.Update(delivery with
+            double actualDistance = delivery.ExpectedDistance ?? 0;
+
+            var updatedDelivery = delivery with
             {
                 CompletionStatus = DO.DeliveryStatus.Delivered,
-                EndDeliveryDate = AdminManager.Now
-            });
+                EndDeliveryDate = AdminManager.Now,
+                ActualDistance = actualDistance
+            };
+
+            s_dal.Delivery.Update(updatedDelivery);
+
+            var order = s_dal.Order.Read(delivery.OrderId);
+            if (order != null)
+            {
+                s_dal.Order.Update(order with
+                {
+                    Status = DO.OrderStatus.Delivered
+                });
+            }
         }
 
         Observers.NotifyItemUpdated(courierId);
         Observers.NotifyListUpdated();
     }
+
+
 
 
     /// <summary>
@@ -457,15 +478,6 @@ internal static class CourierManager
 
                     if (activeDelivery == null)
                         continue;
-
-                    if (Random.Shared.NextDouble() <= 0.15)
-                    {
-                        s_dal.Delivery.Update(activeDelivery with
-                        {
-                            CompletionStatus = DO.DeliveryStatus.Canceled,
-                            EndDeliveryDate = newClock
-                        });
-                    }
                 }
             }
         }

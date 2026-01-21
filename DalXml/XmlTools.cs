@@ -130,6 +130,17 @@ static class XMLTools
         SaveListToXMLElement(root, xmlFileName);
     }
 
+    public static double GetConfigDoubleVal(string xmlFileName, string elemName) =>
+    LoadListFromXMLElement(xmlFileName)
+        .ToDoubleNullable(elemName)
+        ?? throw new FormatException($"can't convert: {xmlFileName}, {elemName}");
+
+    public static void SetConfigDoubleVal(string xmlFileName, string elemName, double elemVal)
+    {
+        XElement root = LoadListFromXMLElement(xmlFileName);
+        root.Element(elemName)?.SetValue(elemVal.ToString());
+        SaveListToXMLElement(root, xmlFileName);
+    }
     #endregion
 
     #region ExtensionMethods

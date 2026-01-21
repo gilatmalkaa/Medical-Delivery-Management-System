@@ -10,7 +10,10 @@ namespace Dal;
 sealed internal class DalXml : IDal
 {
     // Singleton instance
-    public static IDal Instance { get; } = new DalXml();
+    private static readonly Lazy<IDal> _instance =
+        new(() => new DalXml(), true);
+
+    public static IDal Instance => _instance.Value;
 
     /// <summary>
     /// Gets the courier data access implementation.

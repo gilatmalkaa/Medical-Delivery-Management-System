@@ -8,8 +8,12 @@ using DalApi;
 /// </summary>
 sealed internal class DalList : IDal
 {
+
+    private static readonly Lazy<IDal> _instance =
+     new(() => new DalList(), true);
+
     // Singleton instance
-    public static IDal Instance { get; } = new DalList();
+    public static IDal Instance => _instance.Value;
 
     /// <summary>
     /// Gets the <see cref="IOrder"/> implementation for managing orders.

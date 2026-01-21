@@ -96,6 +96,8 @@ public enum OrderStatus
     /// <summary>Order delivery was completed successfully.</summary>
     Delivered,
 
+    Canceled,
+
     /// <summary>Order delivery failed.</summary>
     Failed
 }

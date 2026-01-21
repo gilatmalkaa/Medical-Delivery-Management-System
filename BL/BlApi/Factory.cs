@@ -1,5 +1,7 @@
 ﻿namespace BlApi;
 using BlImplementation;
+using DalApi;
+using System.Data.SqlTypes;
 
 /// <summary>
 /// Factory class responsible for providing access
@@ -11,4 +13,10 @@ public static class Factory
     /// Creates and returns an instance of the BL implementation.
     /// </summary>
     public static IBl Get() => new BlImplementation.Bl();
+
+    /// <summary>
+    /// Gets the singleton instance of the DAL.
+    /// </summary>
+    /// </summary>
+    public static IDal GetDal() => DalApi.Factory.Get;
 }

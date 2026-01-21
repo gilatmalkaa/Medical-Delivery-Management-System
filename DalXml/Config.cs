@@ -75,6 +75,107 @@ internal static class Config
     }
 
     /// <summary>
+    /// Gets or sets the maximum allowed delivery range (in kilometers)
+    /// that a courier can be assigned for an order.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static int MaxRange
+    {
+        get => XMLTools.GetConfigIntVal(s_data_config_xml, "MaxRange");
+        set => XMLTools.SetConfigIntVal(s_data_config_xml, "MaxRange", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum delivery duration (in minutes)
+    /// before a delivery is considered late.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static int MaxDeliveryDurationMinutes
+    {
+        get => XMLTools.GetConfigIntVal(s_data_config_xml, "MaxDeliveryDurationMinutes");
+        set => XMLTools.SetConfigIntVal(s_data_config_xml, "MaxDeliveryDurationMinutes", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the expiration time (in minutes) for time-sensitive samples.
+    /// After this duration, a sample is considered expired.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static int SampleExpirationMinutes
+    {
+        get => XMLTools.GetConfigIntVal(s_data_config_xml, "SampleExpirationMinutes");
+        set => XMLTools.SetConfigIntVal(s_data_config_xml, "SampleExpirationMinutes", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the average courier speed (km/h) when delivering on foot.
+    /// Used for delivery time estimation.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static double FootSpeed
+    {
+        get => XMLTools.GetConfigDoubleVal(s_data_config_xml, "FootSpeed");
+        set => XMLTools.SetConfigDoubleVal(s_data_config_xml, "FootSpeed", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the average courier speed (km/h) when delivering by bicycle.
+    /// Used for delivery time estimation.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static double BikeSpeed
+    {
+        get => XMLTools.GetConfigDoubleVal(s_data_config_xml, "BikeSpeed");
+        set => XMLTools.SetConfigDoubleVal(s_data_config_xml, "BikeSpeed", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the average courier speed (km/h) when delivering by motorcycle.
+    /// Used for delivery time estimation.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static double MotorcycleSpeed
+    {
+        get => XMLTools.GetConfigDoubleVal(s_data_config_xml, "MotorcycleSpeed");
+        set => XMLTools.SetConfigDoubleVal(s_data_config_xml, "MotorcycleSpeed", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the average courier speed (km/h) when delivering by car.
+    /// Used for delivery time estimation.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static double CarSpeed
+    {
+        get => XMLTools.GetConfigDoubleVal(s_data_config_xml, "CarSpeed");
+        set => XMLTools.SetConfigDoubleVal(s_data_config_xml, "CarSpeed", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the price charged per kilometer for a delivery.
+    /// Used to calculate the total delivery cost.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static double PricePerKm
+    {
+        get => XMLTools.GetConfigDoubleVal(s_data_config_xml, "PricePerKm");
+        set => XMLTools.SetConfigDoubleVal(s_data_config_xml, "PricePerKm", value);
+    }
+
+    /// <summary>
+    /// Gets or sets the base delivery price added to every order,
+    /// regardless of distance.
+    /// The value is stored and retrieved from the XML configuration file.
+    /// </summary>
+    internal static double BaseDeliveryPrice
+    {
+        get => XMLTools.GetConfigDoubleVal(s_data_config_xml, "BaseDeliveryPrice");
+        set => XMLTools.SetConfigDoubleVal(s_data_config_xml, "BaseDeliveryPrice", value);
+    }
+
+
+
+    /// <summary>
     /// Gets or sets the simulated clock for the system.
     /// Stored in the configuration XML file.
     /// </summary>

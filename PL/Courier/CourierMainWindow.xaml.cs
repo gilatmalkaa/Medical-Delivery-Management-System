@@ -35,7 +35,9 @@ namespace PL.Courier
         /// Indicates whether the courier can complete the current delivery.
         /// </summary>
         public bool CanFinishDelivery =>
-            Courier?.CurrentOrder != null;
+            Courier?.CurrentOrder != null &&
+            Courier.CurrentOrder.OrderStatus == BO.OrderStatus.InDelivery;
+
 
         /// <summary>
         /// The identifier of the courier displayed in this window.
