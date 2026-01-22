@@ -1,107 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfOrder xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Order>
-    <Id>1001</Id>
-    <Type>Regular</Type>
-    <Description>Documents delivery</Description>
-    <Address>12 Herzl St, Tel Aviv</Address>
-    <Latitude>32.0853</Latitude>
-    <Longitude>34.7818</Longitude>
-    <CustomerName>David Cohen</CustomerName>
-    <CustomerPhone>0501234567</CustomerPhone>
-    <Weight>1.2</Weight>
-    <OpenDate>2026-01-21T21:45:00</OpenDate>
-    <Status>Created</Status>
-  </Order>
-  <Order>
-    <Id>1003</Id>
-    <Type>SameDay</Type>
-    <Description>Electronics package</Description>
-    <Address>18 Weizmann St, Haifa</Address>
-    <Latitude>31.0671</Latitude>
-    <Longitude>35.0671</Longitude>
-    <CustomerName>Yossi Ben-David</CustomerName>
-    <CustomerPhone>0543344556</CustomerPhone>
-    <Weight>3.5</Weight>
-    <OpenDate>2026-01-21T21:50:00</OpenDate>
-    <Status>Created</Status>
-  </Order>
-  <Order>
-    <Id>1307</Id>
-    <Type>SameDay</Type>
-    <Description>Small electronics</Description>
-    <Address>4 Arlozorov St, Tel Aviv</Address>
-    <Latitude>32.0836</Latitude>
-    <Longitude>34.781</Longitude>
-    <CustomerName>Shai Perlman</CustomerName>
-    <CustomerPhone>0512345678</CustomerPhone>
-    <Weight>1.3</Weight>
-    <OpenDate>2026-01-21T22:00:00</OpenDate>
-    <Status>InDelivery</Status>
-  </Order>
-  <Order>
-    <Id>1501</Id>
-    <Type>Express</Type>
-    <Description>Urgent documents</Description>
-    <Address>16 Dizengoff St, Tel Aviv</Address>
-    <Latitude>32.0751</Latitude>
-    <Longitude>34.7749</Longitude>
-    <CustomerName>Tal Mor</CustomerName>
-    <CustomerPhone>0528881122</CustomerPhone>
-    <Weight>0.6</Weight>
-    <OpenDate>2026-01-21T22:15:00</OpenDate>
-    <Status>Delivered</Status>
-  </Order>
-  <Order>
-    <Id>1502</Id>
-    <Type>Regular</Type>
-    <Description>Clothing delivery</Description>
-    <Address>30 Ibn Gabirol St, Tel Aviv</Address>
-    <Latitude>32.0861</Latitude>
-    <Longitude>34.7819</Longitude>
-    <CustomerName>Michal Peretz</CustomerName>
-    <CustomerPhone>0506665544</CustomerPhone>
-    <Weight>2.8</Weight>
-    <OpenDate>2026-01-21T22:25:00</OpenDate>
-    <Status>Created</Status>
-  </Order>
-  <Order>
-    <Id>1601</Id>
-    <Type>Regular</Type>
-    <Description>Office paperwork</Description>
-    <Address>10 Allenby St, Tel Aviv</Address>
-    <Latitude>32.0714</Latitude>
-    <Longitude>34.7732</Longitude>
-    <CustomerName>Noa Shapiro</CustomerName>
-    <CustomerPhone>0509998888</CustomerPhone>
-    <Weight>1.4</Weight>
-    <OpenDate>2026-01-22T10:45:00</OpenDate>
-    <Status>Created</Status>
-  </Order>
-  <Order>
-    <Id>1602</Id>
-    <Type>Express</Type>
-    <Description>Legal envelope</Description>
-    <Address>8 King George St, Tel Aviv</Address>
-    <Latitude>32.0759</Latitude>
-    <Longitude>34.7774</Longitude>
-    <CustomerName>Noam Berger</CustomerName>
-    <CustomerPhone>0523332211</CustomerPhone>
-    <Weight>0.4</Weight>
-    <OpenDate>2026-01-22T10:45:00</OpenDate>
-    <Status>Created</Status>
-  </Order>
-  <Order>
-    <Id>1603</Id>
-    <Type>SameDay</Type>
-    <Description>Computer accessories</Description>
-    <Address>3 HaHashmonaim St, Tel Aviv</Address>
-    <Latitude>32.0705</Latitude>
-    <Longitude>34.7819</Longitude>
-    <CustomerName>Gil Cohen</CustomerName>
-    <CustomerPhone>0548887766</CustomerPhone>
-    <Weight>1.6</Weight>
-    <OpenDate>2026-01-22T10:45:00</OpenDate>
-    <Status>Created</Status>
-  </Order>
+	<Order>
+		<Id>1001</Id>
+		<Type>Regular</Type>
+		<Description>Documents delivery</Description>
+		<Address>12 Herzl St, Tel Aviv</Address>
+		<Latitude>32.0853</Latitude>
+		<Longitude>34.7818</Longitude>
+		<CustomerName>David Cohen</CustomerName>
+		<CustomerPhone>0501234567</CustomerPhone>
+		<Weight>1.2</Weight>
+		<OpenDate>2026-01-21T21:45:00</OpenDate>
+		<Status>Created</Status>
+	</Order>
+	<Order>
+		<Id>1003</Id>
+		<Type>SameDay</Type>
+		<Description>Electronics package</Description>
+		<Address>18 Weizmann St, Haifa</Address>
+		<Latitude>31.0671</Latitude>
+		<Longitude>35.0671</Longitude>
+		<CustomerName>Yossi Ben-David</CustomerName>
+		<CustomerPhone>0543344556</CustomerPhone>
+		<Weight>3.5</Weight>
+		<OpenDate>2026-01-21T21:50:00</OpenDate>
+		<Status>Created</Status>
+	</Order>
+	<Order>
+		<Id>1307</Id>
+		<Type>SameDay</Type>
+		<Description>Small electronics</Description>
+		<Address>4 Arlozorov St, Tel Aviv</Address>
+		<Latitude>32.0836</Latitude>
+		<Longitude>34.781</Longitude>
+		<CustomerName>Shai Perlman</CustomerName>
+		<CustomerPhone>0512345678</CustomerPhone>
+		<Weight>1.3</Weight>
+		<OpenDate>2026-01-21T22:00:00</OpenDate>
+		<Status>InDelivery</Status>
+	</Order>
+	<Order>
+		<Id>1501</Id>
+		<Type>Express</Type>
+		<Description>Urgent documents</Description>
+		<Address>16 Dizengoff St, Tel Aviv</Address>
+		<Latitude>32.0751</Latitude>
+		<Longitude>34.7749</Longitude>
+		<CustomerName>Tal Mor</CustomerName>
+		<CustomerPhone>0528881122</CustomerPhone>
+		<Weight>0.6</Weight>
+		<OpenDate>2026-01-21T22:15:00</OpenDate>
+		<Status>Delivered</Status>
+	</Order>
+	<Order>
+		<Id>1502</Id>
+		<Type>Regular</Type>
+		<Description>Clothing delivery</Description>
+		<Address>30 Ibn Gabirol St, Tel Aviv</Address>
+		<Latitude>32.0861</Latitude>
+		<Longitude>34.7819</Longitude>
+		<CustomerName>Michal Peretz</CustomerName>
+		<CustomerPhone>0506665544</CustomerPhone>
+		<Weight>2.8</Weight>
+		<OpenDate>2026-01-21T22:25:00</OpenDate>
+		<Status>Created</Status>
+	</Order>
+	<Order>
+		<Id>1601</Id>
+		<Type>Regular</Type>
+		<Description>Office paperwork</Description>
+		<Address>10 Allenby St, Tel Aviv</Address>
+		<Latitude>32.0714</Latitude>
+		<Longitude>34.7732</Longitude>
+		<CustomerName>Noa Shapiro</CustomerName>
+		<CustomerPhone>0509998888</CustomerPhone>
+		<Weight>1.4</Weight>
+		<OpenDate>2026-01-22T10:45:00</OpenDate>
+		<Status>Created</Status>
+	</Order>
+	<Order>
+		<Id>1602</Id>
+		<Type>Express</Type>
+		<Description>Legal envelope</Description>
+		<Address>8 King George St, Tel Aviv</Address>
+		<Latitude>32.0759</Latitude>
+		<Longitude>34.7774</Longitude>
+		<CustomerName>Noam Berger</CustomerName>
+		<CustomerPhone>0523332211</CustomerPhone>
+		<Weight>0.4</Weight>
+		<OpenDate>2026-01-22T10:45:00</OpenDate>
+		<Status>Created</Status>
+	</Order>
+	<Order>
+		<Id>1603</Id>
+		<Type>SameDay</Type>
+		<Description>Computer accessories</Description>
+		<Address>3 HaHashmonaim St, Tel Aviv</Address>
+		<Latitude>32.0705</Latitude>
+		<Longitude>34.7819</Longitude>
+		<CustomerName>Gil Cohen</CustomerName>
+		<CustomerPhone>0548887766</CustomerPhone>
+		<Weight>1.6</Weight>
+		<OpenDate>2026-01-22T10:45:00</OpenDate>
+		<Status>Created</Status>
+	</Order>
 </ArrayOfOrder>

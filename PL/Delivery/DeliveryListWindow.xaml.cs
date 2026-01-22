@@ -125,9 +125,6 @@ namespace PL.Delivery
             if (SelectedDelivery is null)
                 return;
 
-            new DeliveryAddUpdateWindow(
-                SelectedDelivery.DeliveryId).ShowDialog();
-
             await RefreshListAsync();
         }
 
@@ -147,9 +144,6 @@ namespace PL.Delivery
                     MessageBoxImage.Information);
                 return;
             }
-
-            new DeliveryAddUpdateWindow(
-                SelectedDelivery.DeliveryId).ShowDialog();
 
             await RefreshListAsync();
         }

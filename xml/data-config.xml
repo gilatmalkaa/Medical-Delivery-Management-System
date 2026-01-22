@@ -4,11 +4,11 @@
   <AdminId>123456789</AdminId>
   <AdminPassword>admin123</AdminPassword>
   <!-- ===== System time ===== -->
-  <Clock>21/01/2026 20:09:28</Clock>
+  <Clock>22/01/2026 11:44:15</Clock>
   <!-- ===== Delivery constraints ===== -->
-  <MaxRange>40</MaxRange>
+  <MaxRange>30</MaxRange>
   <SampleExpirationMinutes>120</SampleExpirationMinutes>
-  <MaxDeliveryDurationMinutes>240</MaxDeliveryDurationMinutes>
+  <MaxDeliveryDurationMinutes>140</MaxDeliveryDurationMinutes>
   <!-- ===== Courier speeds (km/h) ===== -->
   <FootSpeed>6</FootSpeed>
   <BikeSpeed>18</BikeSpeed>
