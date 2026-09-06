@@ -407,8 +407,6 @@ The order management screen displays order types, delivery status, schedule stat
 Couriers can view their personal information, delivery statistics, active orders, delivery history and available orders.
 <img width="1321" height="963" alt="image" src="https://github.com/user-attachments/assets/7719d7fa-3908-439c-8534-c6c531debc42" />
 
-```
-
 ---
 
 ## Future Improvements
