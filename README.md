@@ -1,15 +1,17 @@
 # Medical Delivery Management System
 
-A desktop delivery-management application built with **C#**, **.NET 8**, and **WPF**.
+A desktop medical delivery-management application developed independently using **C#**, **.NET 8**, **WPF**, and **XAML**.
 
-The system manages medical deliveries from order creation through courier assignment and delivery completion.  
-The project is built using a layered architecture with a clear separation between the **Presentation Layer**, **Business Logic Layer**, and **Data Access Layer**.
+The system manages the complete delivery lifecycle — from order creation and courier assignment to delivery tracking and completion.
 
+It follows a layered architecture with clear separation between the **Presentation Layer**, **Business Logic Layer**, and **Data Access Layer**.
+
+> **Solo Project** — Designed and developed independently as part of a .NET course.
 ---
 
 ## Submitted By
 
-**Gilat Kedem**  
+**Gilat Malka**  
 **ID:** 213196363
 
 ---
@@ -386,11 +388,25 @@ This project demonstrates:
 
 Add screenshots here after uploading them to the repository:
 
-```md
-![Login Screen](screenshots/login.png)
-![Admin Dashboard](screenshots/admin-dashboard.png)
-![Courier Management](screenshots/courier-management.png)
-![Order Management](screenshots/order-management.png)
+### Login
+<img width="1215" height="709" alt="image" src="https://github.com/user-attachments/assets/5d2f91a6-6932-4ea4-ab50-84c006a4e6fc" />
+
+### Admin Dashboard
+The admin dashboard provides system controls, delivery statistics, order summaries, system time management and simulator controls.
+<img width="1327" height="916" alt="image" src="https://github.com/user-attachments/assets/0986f67e-1098-46b5-8bfe-5f34f1943951" />
+
+### Couriers Management
+Admins can view, filter, add, update and remove couriers while monitoring delivery performance.
+<img width="1342" height="955" alt="image" src="https://github.com/user-attachments/assets/7560f082-0d4a-4959-93ce-f68bdbe2ad57" />
+
+### Orders Management
+The order management screen displays order types, delivery status, schedule status and timing information.
+<img width="1327" height="939" alt="image" src="https://github.com/user-attachments/assets/c7cdd94e-ad88-46ae-af59-18febff897fe" />
+
+### Courier Workspace
+Couriers can view their personal information, delivery statistics, active orders, delivery history and available orders.
+<img width="1321" height="963" alt="image" src="https://github.com/user-attachments/assets/7719d7fa-3908-439c-8534-c6c531debc42" />
+
 ```
 
 ---
