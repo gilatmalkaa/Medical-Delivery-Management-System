@@ -425,10 +425,3 @@ Couriers can view their personal information, delivery statistics, active orders
 This project was developed as part of a .NET course assignment.
 
 The system follows a staged development structure, starting from basic DAL functionality and progressing to a full WPF application with business logic, XML persistence, UI synchronization, and simulation features.
-
----
-
-## Author
-
-**Gilat Kedem**  
-**ID:** 213196363
