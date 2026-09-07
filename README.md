@@ -12,8 +12,6 @@ It follows a layered architecture with clear separation between the **Presentati
 ## Submitted By
 
 **Gilat Malka**  
-**ID:** 213196363
-
 ---
 
 ## Overview
