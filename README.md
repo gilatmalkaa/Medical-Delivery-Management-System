@@ -9,9 +9,7 @@ It follows a layered architecture with clear separation between the **Presentati
 > **Solo Project** — Designed and developed independently as part of a .NET course.
 ---
 
-## Submitted By
-
-**Gilat Malka**  
+## Submitted By - Gilat Malka
 ---
 
 ## Overview
